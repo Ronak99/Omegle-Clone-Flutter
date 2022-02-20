@@ -1,0 +1,5 @@
+
+enum UserType {
+  authenticated,
+  unauthenticated,
+}
