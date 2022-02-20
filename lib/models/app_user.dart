@@ -5,9 +5,9 @@ class BaseUser {
   final String uid;
   final UserType userType;
 
-  baseUserFunction() {}
-
   BaseUser({required this.uid, required this.userType});
+
+  bool get isAuthenticated => userType == UserType.authenticated;
 }
 
 class AuthenticatedUser extends BaseUser {
@@ -21,5 +21,5 @@ class AuthenticatedUser extends BaseUser {
 
 class UnAuthenticatedUser extends BaseUser {
   UnAuthenticatedUser()
-      : super(uid: Utils.generateUserId(), userType: UserType.authenticated);
+      : super(uid: Utils.generateRandomId(), userType: UserType.authenticated);
 }

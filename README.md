@@ -10,9 +10,12 @@ Omegle Clone is an.. Omegle like app
 ## Searching For Chat
 1. Contains search button, on searching engagement status of the user is changed to searching.
 2. Two users with searching statuses are picked at random
-3. Check whether these two users are friends
-    a. if they are match them within their existing room_id
-    b. else store corressponding details within the chat_room collection and all the messages are posted under messages collection
+3. Check whether user is authenticated
+    a. If user is unauthenticated, create a room and join them
+    b. if user is authenticated
+        i. Check whether these two users are friends
+            1. if they are, match them within their existing room_id
+            2. else store corressponding details within the chat_room collection and all the messages are posted under messages collection
 
 ## Friend Requests
 1. Users can send strangers friend requests, these friend requests can only be sent and accepted while the chat is active, if a user leaves chat room before accepting the chat request, the chat will be gone forever.
