@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "131255556459",
+    "project_id": "flutter-omegle-clone",
+    "storage_bucket": "flutter-omegle-clone.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131255556459:android:c87770ec5fd2674cd3142e",
+        "android_client_info": {
+          "package_name": "com.example.omegle_clone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "131255556459-at5fm5ej103tkrb033horho5lsj1ppu6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9L2be2AwY7s9FsHHKVV8GW89rimp75BQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131255556459-at5fm5ej103tkrb033horho5lsj1ppu6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -35,7 +35,7 @@ dependencies:
   firebase_core: ^1.12.0
   flutter:
     sdk: flutter
-  secure_random: ^1.0.1
+  provider: ^6.0.2
 
 dev_dependencies:
   flutter_lints: ^1.0.0

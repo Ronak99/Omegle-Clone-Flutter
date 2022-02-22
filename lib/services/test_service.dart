@@ -5,14 +5,14 @@ import 'package:omegle_clone/utils/firestore_refs.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
 class TestService {
-  createRandomUsers() {
-    for (int i = 0; i < 30; i++) {
-      String _randomUid = Utils.generateRandomId();
-      FirestoreRefs.engagementCollection
-          .doc(_randomUid)
-          .set({'status': 'free', 'uid': _randomUid});
-    }
-  }
+  // createRandomUsers() {
+  //   for (int i = 0; i < 30; i++) {
+  //     String _randomUid = Utils.generateRandomId();
+  //     FirestoreRefs.engagementCollection
+  //         .doc(_randomUid)
+  //         .set({'status': 'free', 'uid': _randomUid});
+  //   }
+  // }
 
 
   T genericTryCatch<T>(T a) {

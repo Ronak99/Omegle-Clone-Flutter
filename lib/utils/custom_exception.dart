@@ -8,6 +8,6 @@ class CustomException implements Exception {
 
   @override
   String toString() {
-    return "CustomException: $message";
+    return "CustomException: $message, code: $code";
   }
 }
