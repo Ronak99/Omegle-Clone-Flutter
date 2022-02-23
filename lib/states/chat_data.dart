@@ -6,7 +6,7 @@ import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
-class ChatState extends ChangeNotifier {
+class ChatData extends ChangeNotifier {
   final EngagementService _engagementService = EngagementService();
   final RandomChatService _randomChatService = RandomChatService();
 

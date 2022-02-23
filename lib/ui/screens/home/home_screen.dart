@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/user_state.dart';
-import 'package:omegle_clone/states/chat_state.dart';
+import 'package:omegle_clone/states/chat_data.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ChatState _chatScreenState = Provider.of<ChatState>(context);
+    ChatData _chatData = Provider.of<ChatData>(context);
 
     return Scaffold(
       body: Container(
@@ -41,12 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(_userData.unAuthenticatedUser!.uid),
-                  _chatScreenState.isSearching
+                  _chatData.isSearching
                       ? CircularProgressIndicator()
                       : TextButton(
                           child: Text('Search Chat'),
                           onPressed: () {
-                            _chatScreenState.searchRandomUser(
+                            _chatData.searchRandomUser(
                               currentUserId: _userData.unAuthenticatedUser!.uid,
                             );
                           },

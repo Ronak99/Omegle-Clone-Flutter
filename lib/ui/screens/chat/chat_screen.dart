@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:omegle_clone/states/chat_state.dart';
+import 'package:omegle_clone/states/chat_data.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/user_state.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +9,7 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ChatState _chatState = Provider.of<ChatState>(context, listen: false);
+    ChatData _chatData = Provider.of<ChatData>(context, listen: false);
     EngagementData _engagementData =
         Provider.of<EngagementData>(context, listen: false);
     UserData _userData = Provider.of<UserData>(context, listen: false);
@@ -26,7 +26,7 @@ class ChatScreen extends StatelessWidget {
                 SizedBox(width: 12),
                 Expanded(
                   child: TextField(
-                    controller: _chatState.messageFieldController,
+                    controller: _chatData.messageFieldController,
                     style: TextStyle(
                       fontSize: 15,
                     ),
@@ -48,7 +48,7 @@ class ChatScreen extends StatelessWidget {
                     Icons.send,
                     color: Colors.blue,
                   ),
-                  onPressed: () => _chatState.onSendMessageButtonTap(
+                  onPressed: () => _chatData.onSendMessageButtonTap(
                     uid: _userData.unAuthenticatedUser!.uid,
                     roomId: _engagementData.engagement.roomId!,
                   ),
