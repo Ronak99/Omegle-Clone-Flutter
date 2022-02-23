@@ -126,4 +126,10 @@ class RandomChatService {
       throw CustomException(e.message!);
     }
   }
+
+  Stream<QuerySnapshot<Message>> queryRoomChat({required String roomId}) {
+    return FirestoreRefs.getRoomMessageCollection(roomId: roomId)
+        .orderBy('sent_ts', descending: true)
+        .snapshots();
+  }
 }

@@ -13,6 +13,9 @@ class ChatData extends ChangeNotifier {
   bool _isSearching = false;
   bool get isSearching => _isSearching;
 
+  List<Message>? _messageList;
+  List<Message>? get getMessages => _messageList;
+
   // Message text field controller
   final TextEditingController messageFieldController = TextEditingController();
 
@@ -37,7 +40,8 @@ class ChatData extends ChangeNotifier {
     required String uid,
   }) async {
     if (messageFieldController.text.trim().isEmpty) {
-      throw CustomException("Message field cannot be empty");
+      Utils.errorSnackbar("Message field cannot be empty");
+      return;
     }
 
     Message _message = Message(
@@ -48,12 +52,19 @@ class ChatData extends ChangeNotifier {
       roomId: roomId,
     );
 
+    messageFieldController.text = '';
+
     try {
       await _randomChatService.sendMessage(message: _message);
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
     }
+  }
 
-    messageFieldController.text = '';
+  intializeMessageList({required String roomId}) {
+    _randomChatService.queryRoomChat(roomId: roomId).listen((messageQuery) {
+      _messageList = messageQuery.docs.map((e) => e.data()).toList();
+      notifyListeners();
+    });
   }
 }
