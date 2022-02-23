@@ -1,22 +1,20 @@
-import 'dart:convert';
 
 import 'package:omegle_clone/enums/engagement_status.dart';
 import 'package:omegle_clone/extensions/engagement_status_extension.dart';
 import 'package:omegle_clone/extensions/string_extensions.dart';
-import 'package:omegle_clone/utils/value_convertors.dart';
 
 class Engagement {
   String uid;
-  String? roomId;
   EngagementStatus engagementStatus;
-  int searchStartedOn;
+  String? roomId;
+  int? searchStartedOn;
   String? connectedWith;
   Engagement({
     required this.uid,
     this.roomId,
     this.connectedWith,
     required this.engagementStatus,
-    required this.searchStartedOn,
+    this.searchStartedOn,
   });
 
   Map<String, dynamic> toMap() {

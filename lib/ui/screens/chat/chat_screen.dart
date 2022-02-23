@@ -1,55 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:omegle_clone/states/chat/chat_screen_state.dart';
+import 'package:omegle_clone/states/chat_state.dart';
+import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/user_state.dart';
 import 'package:provider/provider.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends StatelessWidget {
   const ChatScreen({Key? key}) : super(key: key);
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
-}
-
-class _ChatScreenState extends State<ChatScreen> {
-  late UserData _userData;
-
-  @override
-  void initState() {
-    super.initState();
-    _userData = Provider.of<UserData>(context, listen: false);
-
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      _userData.initialize();
-      setState(() {});
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    ChatScreenState _chatScreenState = Provider.of<ChatScreenState>(context);
+    ChatState _chatState = Provider.of<ChatState>(context, listen: false);
+    EngagementData _engagementData =
+        Provider.of<EngagementData>(context, listen: false);
+    UserData _userData = Provider.of<UserData>(context, listen: false);
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        child: _userData.unAuthenticatedUser == null
-            ? SizedBox()
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(_userData.unAuthenticatedUser!.uid),
-                  _chatScreenState.isSearching
-                      ? CircularProgressIndicator()
-                      : TextButton(
-                          child: Text('Search Chat'),
-                          onPressed: () {
-                            _chatScreenState.searchRandomUser(
-                              context: context,
-                              currentUserId: _userData.unAuthenticatedUser!.uid,
-                            );
-                          },
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(),
+            ),
+            Row(
+              children: [
+                SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _chatState.messageFieldController,
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hintText: 'Send a new message...',
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          width: .5,
+                          color: Colors.black38,
                         ),
-                ],
-              ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 5),
+                IconButton(
+                  icon: Icon(
+                    Icons.send,
+                    color: Colors.blue,
+                  ),
+                  onPressed: () => _chatState.onSendMessageButtonTap(
+                    uid: _userData.unAuthenticatedUser!.uid,
+                    roomId: _engagementData.engagement.roomId!,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+          ],
+        ),
       ),
     );
   }

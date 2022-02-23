@@ -1,9 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:omegle_clone/models/app_user.dart';
-import 'package:omegle_clone/states/chat/chat_screen_state.dart';
+import 'package:omegle_clone/states/chat_state.dart';
+import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/user_state.dart';
+import 'package:omegle_clone/ui/screens/home/home_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:one_context/one_context.dart';
 
 import 'ui/screens/chat/chat_screen.dart';
 
@@ -21,12 +23,14 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<UserData>(create: (_) => UserData()),
-        ChangeNotifierProvider<ChatScreenState>(
-            create: (_) => ChatScreenState()),
+        ChangeNotifierProvider<ChatState>(create: (_) => ChatState()),
+        ChangeNotifierProvider<EngagementData>(create: (_) => EngagementData()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: ChatScreen(),
+        builder: OneContext().builder,
+        navigatorKey: OneContext().key,
+        home: HomeScreen(),
       ),
     );
   }

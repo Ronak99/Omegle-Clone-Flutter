@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:omegle_clone/enums/engagement_status.dart';
 import 'package:omegle_clone/models/engagement.dart';
+import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/services/engagement_service.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/firestore_refs.dart';
@@ -9,10 +10,10 @@ import 'package:omegle_clone/utils/utils.dart';
 class RandomChatService {
   final EngagementService _engagementService = EngagementService();
 
-  searchUserToChat({required String uid}) async {
+  Future<String> searchUserToChat({required String uid}) async {
     try {
-      Engagement _createdEngagement =
-          await _engagementService.createInitialEngagementRecord(uid);
+      int _searchStartTs =
+          await _engagementService.setEngagementStatusToSearching(uid);
 
       // query all the free users
       List<String> _listOfPotentialUsers = [];
@@ -26,11 +27,12 @@ class RandomChatService {
 
         // Don't do anything if I have been marked busy by someone else
         if (_selfEngagement.isBusy) {
-          return;
+          // Return the room id with which I have been marked busy
+          return _selfEngagement.roomId!;
         }
 
         _listOfPotentialUsers =
-            await _engagementService.queryPotentialUsers(uid);
+            await _engagementService.queryPotentialUsers(idToExclude: uid);
         if (_listOfPotentialUsers.isNotEmpty) {
           break;
         }
@@ -54,15 +56,15 @@ class RandomChatService {
 
       if (_pickedUserEngagement.isBusy) {
         if (_pickedUserEngagement.connectedWith == uid) {
-          print(
-              'User was connected with us in room : ${_pickedUserEngagement.roomId}');
+          return _pickedUserEngagement.roomId!;
         } else {
-          throw CustomException('User was already busy');
+          // If the user was already busy, find another user
+          // Keep finding another user until the list of potential users are empty
+          return searchUserToChat(uid: uid);
         }
       }
 
-      if (_createdEngagement.searchStartedOn <
-          _pickedUserEngagement.searchStartedOn) {
+      if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
         // We started the search first, so we will assume command
 
         // If they are not marked busy, then mark them busy, with chat room
@@ -89,7 +91,7 @@ class RandomChatService {
         );
       }
 
-      print('chat room created successfully');
+      return _roomId;
 
       // if user is authenticated
       // check if the picked user is a friend
@@ -116,5 +118,12 @@ class RandomChatService {
     }
   }
 
-  sendMessage() {}
+  sendMessage({required Message message}) async {
+    try {
+      await FirestoreRefs.getRoomMessageCollection(roomId: message.roomId)
+          .add(message);
+    } on FirebaseException catch (e) {
+      throw CustomException(e.message!);
+    }
+  }
 }
