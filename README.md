@@ -22,7 +22,15 @@ Omegle Clone is an.. Omegle like app
 2. On Accepting the friend request, chat carries on as it is, and the user is saved in friends_list along with room_id
 
 ## Closing Room
-1. Upon closing a room, check if the engaged users are friends, if they are, don't delete chats
+1. On closing a room, the person who closes the room will go back to home screen
+2. The other will stay on chat screen, where they won't be able to message anymore, but can search for a new chat
+3. When a user leaves chat screen while their engagement is free, this becomes an indication to delete that specific room from database
+
+## Conditions for closing room
+1. When user leaves the chat screen
+2. When user closes the app
+
+
 
 ## Viewing Friends
 1. Friends can be seen listed within the friends tab
