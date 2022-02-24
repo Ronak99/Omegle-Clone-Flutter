@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:omegle_clone/enums/engagement_status.dart';
+import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/engagement.dart';
 import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/services/engagement_service.dart';
@@ -82,13 +83,17 @@ class RandomChatService {
           engagementStatus: EngagementStatus.busy,
         );
 
-        // if user is un-authenticated
-        // create chat room
-        await createChatRoom(
+        ChatRoom _chatRoom = ChatRoom(
           creatorId: uid,
           joineeId: _pickedUserId,
           roomId: _roomId,
+          isEngaged: true,
+          type: 'one-to-one',
         );
+
+        // if user is un-authenticated
+        // create chat room
+        await createChatRoom(chatRoom: _chatRoom);
       }
 
       return _roomId;
@@ -102,16 +107,20 @@ class RandomChatService {
     }
   }
 
-  createChatRoom({
-    required String creatorId,
-    required String joineeId,
-    required String roomId,
-  }) async {
+  createChatRoom({required ChatRoom chatRoom}) async {
     try {
-      await FirestoreRefs.chatRoomCollection.doc(roomId).set({
-        'creator_id': creatorId,
-        'joinee_id': joineeId,
-        'type': 'one-to-one',
+      await FirestoreRefs.chatRoomCollection.doc(chatRoom.roomId).set(chatRoom);
+    } on FirebaseException catch (e) {
+      throw CustomException(e.message!);
+    }
+  }
+
+  closeChatRoom({required String roomId, required String uid}) async {
+    try {
+      await FirestoreRefs.chatRoomCollection.doc(roomId).update({
+        'closed_by': roomId,
+        'closed_on': DateTime.now().millisecondsSinceEpoch,
+        'is_engaged': false,
       });
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
@@ -131,5 +140,9 @@ class RandomChatService {
     return FirestoreRefs.getRoomMessageCollection(roomId: roomId)
         .orderBy('sent_ts', descending: true)
         .snapshots();
+  }
+
+  Stream<DocumentSnapshot<ChatRoom>> chatRoomStream({required String roomId}) {
+    return FirestoreRefs.chatRoomCollection.doc(roomId).snapshots();
   }
 }

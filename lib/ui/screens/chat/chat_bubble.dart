@@ -16,11 +16,11 @@ class ChatBubble extends StatelessWidget {
     bool _isSentByMe = message.sentBy == currentUserId;
 
     return Align(
-      alignment: _isSentByMe ? Alignment.centerLeft : Alignment.centerRight,
+      alignment: _isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: _isSentByMe ? Colors.blue[400]! : Colors.green[100],
+          color: _isSentByMe ? Colors.blue[400]! : Colors.grey[300],
         ),
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         margin: EdgeInsets.only(bottom: 8),

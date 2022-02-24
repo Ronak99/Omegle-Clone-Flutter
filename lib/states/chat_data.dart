@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/services/engagement_service.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
 import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
+import 'package:omegle_clone/utils/firestore_refs.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
 class ChatData extends ChangeNotifier {
@@ -15,6 +17,9 @@ class ChatData extends ChangeNotifier {
 
   List<Message>? _messageList;
   List<Message>? get getMessages => _messageList;
+
+  ChatRoom? _chatRoom;
+  ChatRoom? get chatRoom => _chatRoom;
 
   // Message text field controller
   final TextEditingController messageFieldController = TextEditingController();
@@ -66,5 +71,24 @@ class ChatData extends ChangeNotifier {
       _messageList = messageQuery.docs.map((e) => e.data()).toList();
       notifyListeners();
     });
+  }
+
+  initializeChatRoom({required String roomId}) {
+    _randomChatService.chatRoomStream(roomId: roomId).listen((chatRoomValue) {
+      _chatRoom = chatRoomValue.data();
+      notifyListeners();
+    });
+  }
+
+  closeChatRoom({required String uid}) async {
+    try {
+      await _randomChatService.closeChatRoom(
+        uid: uid,
+        roomId: _chatRoom!.roomId,
+      );
+      Utils.pop();
+    } on CustomException catch (e) {
+      Utils.errorSnackbar(e.message);
+    }
   }
 }

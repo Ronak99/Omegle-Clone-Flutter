@@ -28,76 +28,96 @@ class _ChatScreenState extends State<ChatScreen> {
     _userData = Provider.of<UserData>(context, listen: false);
 
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      _chatData.initializeChatRoom(roomId: _engagementData.engagement.roomId!);
       _chatData.intializeMessageList(
-          roomId: _engagementData.engagement.roomId!);
+        roomId: _engagementData.engagement.roomId!,
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Consumer<ChatData>(
-                builder: (context, provider, _) {
-                  if (provider.getMessages == null)
-                    return Center(child: CircularProgressIndicator());
-                  if (provider.getMessages!.isEmpty)
-                    return Center(child: Text('Send the first message'));
-
-                  return ListView.builder(
-                    itemCount: provider.getMessages!.length,
-                    reverse: true,
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    itemBuilder: (context, i) {
-                      return ChatBubble(
-                        message: provider.getMessages![i],
-                        currentUserId: _userData.unAuthenticatedUser!.uid,
-                      );
-                    },
-                  );
-                },
+      body: Column(
+        children: [
+          SizedBox(height: MediaQuery.of(context).padding.top),
+          Align(
+            alignment: Alignment.center,
+            child: TextButton(
+              child: Text("Leave Room"),
+              onPressed: () => _chatData.closeChatRoom(
+                uid: _userData.unAuthenticatedUser!.uid,
               ),
             ),
-            Row(
-              children: [
-                SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _chatData.messageFieldController,
-                    style: TextStyle(
-                      fontSize: 15,
-                    ),
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Send a new message...',
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: .5,
-                          color: Colors.black38,
+          ),
+          SizedBox(height: 12),
+          Expanded(
+            child: Consumer<ChatData>(
+              builder: (context, provider, _) {
+                if (provider.getMessages == null)
+                  return Center(child: CircularProgressIndicator());
+                if (provider.getMessages!.isEmpty)
+                  return Center(child: Text('Send the first message'));
+
+                return ListView.builder(
+                  itemCount: provider.getMessages!.length,
+                  reverse: true,
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  itemBuilder: (context, i) {
+                    return ChatBubble(
+                      message: provider.getMessages![i],
+                      currentUserId: _userData.unAuthenticatedUser!.uid,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Consumer<ChatData>(
+            builder: (context, provider, _) {
+              print(provider.chatRoom!.isEngaged);
+              if (provider.chatRoom != null && !provider.chatRoom!.isEngaged) {
+                return Center(child: Text("CLOSED ROOM"));
+              }
+
+              return Row(
+                children: [
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _chatData.messageFieldController,
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: 'Send a new message...',
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            width: .5,
+                            color: Colors.black38,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(width: 5),
-                IconButton(
-                  icon: Icon(
-                    Icons.send,
-                    color: Colors.blue,
+                  SizedBox(width: 5),
+                  IconButton(
+                    icon: Icon(
+                      Icons.send,
+                      color: Colors.blue,
+                    ),
+                    onPressed: () => _chatData.onSendMessageButtonTap(
+                      uid: _userData.unAuthenticatedUser!.uid,
+                      roomId: _engagementData.engagement.roomId!,
+                    ),
                   ),
-                  onPressed: () => _chatData.onSendMessageButtonTap(
-                    uid: _userData.unAuthenticatedUser!.uid,
-                    roomId: _engagementData.engagement.roomId!,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 12),
-          ],
-        ),
+                ],
+              );
+            },
+          ),
+          SizedBox(height: 12),
+        ],
       ),
     );
   }

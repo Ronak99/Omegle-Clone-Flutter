@@ -28,6 +28,14 @@ class Utils {
     }
   }
 
+  static pop() {
+    try {
+      OneContext().pop();
+    } catch (e) {
+      print("Error while navigating : $e");
+    }
+  }
+
   static warningSnackbar(String msg) => _showSnackbar(
         message: msg,
         snackbarType: SnackbarType.warning,
