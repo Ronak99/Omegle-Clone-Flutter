@@ -1,3 +1,3 @@
 class AgoraConfig{
-  
+  String appId = '';
 }
