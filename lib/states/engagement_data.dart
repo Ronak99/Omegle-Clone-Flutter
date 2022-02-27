@@ -28,8 +28,4 @@ class EngagementData extends ChangeNotifier {
       notifyListeners();
     });
   }
-
-  reset() {
-    _engagementStreamSub.cancel();
-  }
 }

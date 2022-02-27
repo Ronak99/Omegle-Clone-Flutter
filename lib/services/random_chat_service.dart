@@ -70,16 +70,10 @@ class RandomChatService {
 
         // If they are not marked busy, then mark them busy, with chat room
         // mark both the users busy
-        _engagementService.updateEngagementStatus(
+        _engagementService.connectUsers(
           uid: uid,
           roomId: _roomId,
           connectedWith: _pickedUserId,
-          engagementStatus: EngagementStatus.busy,
-        );
-        _engagementService.updateEngagementStatus(
-          uid: _pickedUserId,
-          connectedWith: uid,
-          roomId: _roomId,
           engagementStatus: EngagementStatus.busy,
         );
 
@@ -118,10 +112,18 @@ class RandomChatService {
   closeChatRoom({required String roomId, required String uid}) async {
     try {
       await FirestoreRefs.chatRoomCollection.doc(roomId).update({
-        'closed_by': roomId,
+        'closed_by': uid,
         'closed_on': DateTime.now().millisecondsSinceEpoch,
         'is_engaged': false,
       });
+    } on FirebaseException catch (e) {
+      throw CustomException(e.message!);
+    }
+  }
+
+  deleteChatRoom({required String roomId}) async {
+    try {
+      await FirestoreRefs.chatRoomCollection.doc(roomId).delete();
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
     }

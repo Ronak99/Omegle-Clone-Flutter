@@ -54,6 +54,7 @@ class Utils {
   static _showSnackbar({
     required String message,
     required SnackbarType snackbarType,
+    int durationInSeconds = 2,
   }) {
     late Color _color;
 
@@ -73,7 +74,10 @@ class Utils {
       builder: (context) => SnackBar(
         content: Text(message),
         backgroundColor: _color,
+        duration: Duration(seconds: durationInSeconds),
       ),
     );
   }
+
+  static dismissSnackbar() => OneContext().hideCurrentSnackBar();
 }

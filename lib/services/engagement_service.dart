@@ -33,6 +33,9 @@ class EngagementService {
     try {
       await FirestoreRefs.engagementCollection.doc(uid).update({
         'status': EngagementStatus.free.toRawValue,
+        'search_started_on': null,
+        'room_id': null,
+        'connected_with': null,
       });
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
@@ -54,7 +57,7 @@ class EngagementService {
     }
   }
 
-  updateEngagementStatus({
+  connectUsers({
     required String uid,
     required EngagementStatus engagementStatus,
     required String roomId,
@@ -65,6 +68,11 @@ class EngagementService {
         'status': engagementStatus.toRawValue,
         'room_id': roomId,
         'connected_with': connectedWith,
+      });
+      await FirestoreRefs.engagementCollection.doc(connectedWith).update({
+        'status': engagementStatus.toRawValue,
+        'room_id': roomId,
+        'connected_with': uid,
       });
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
