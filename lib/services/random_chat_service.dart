@@ -123,6 +123,15 @@ class RandomChatService {
 
   deleteChatRoom({required String roomId}) async {
     try {
+      QuerySnapshot<Message> _messageList =
+          await FirestoreRefs.getRoomMessageCollection(roomId: roomId).get();
+
+      for (DocumentSnapshot messageDoc in _messageList.docs) {
+        await FirestoreRefs.getRoomMessageCollection(roomId: roomId)
+            .doc(messageDoc.id)
+            .delete();
+      }
+
       await FirestoreRefs.chatRoomCollection.doc(roomId).delete();
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
