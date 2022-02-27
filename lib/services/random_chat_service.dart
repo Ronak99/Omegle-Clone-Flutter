@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:omegle_clone/enums/engagement_status.dart';
+import 'package:omegle_clone/enums/engagement_type.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/engagement.dart';
 import 'package:omegle_clone/models/message.dart';
@@ -13,8 +14,13 @@ class RandomChatService {
 
   Future<String> searchUserToChat({required String uid}) async {
     try {
+      const _engagementType = EngagegmentType.chat;
+
       int _searchStartTs =
-          await _engagementService.setEngagementStatusToSearching(uid);
+          await _engagementService.setEngagementStatusToSearching(
+        uid,
+        engagegmentType: _engagementType,
+      );
 
       // query all the free users
       List<String> _listOfPotentialUsers = [];
@@ -32,8 +38,10 @@ class RandomChatService {
           return _selfEngagement.roomId!;
         }
 
-        _listOfPotentialUsers =
-            await _engagementService.queryPotentialUsers(idToExclude: uid);
+        _listOfPotentialUsers = await _engagementService.queryPotentialUsers(
+          idToExclude: uid,
+          engagementType: _engagementType,
+        );
         if (_listOfPotentialUsers.isNotEmpty) {
           break;
         }
@@ -74,7 +82,6 @@ class RandomChatService {
           uid: uid,
           roomId: _roomId,
           connectedWith: _pickedUserId,
-          engagementStatus: EngagementStatus.busy,
         );
 
         ChatRoom _chatRoom = ChatRoom(
@@ -82,7 +89,103 @@ class RandomChatService {
           joineeId: _pickedUserId,
           roomId: _roomId,
           isEngaged: true,
-          type: 'one-to-one',
+          type: 'chat',
+        );
+
+        // if user is un-authenticated
+        // create chat room
+        await createChatRoom(chatRoom: _chatRoom);
+      }
+
+      return _roomId;
+
+      // if user is authenticated
+      // check if the picked user is a friend
+      // if they are, make them join the same room
+      // else create chat room
+    } on CustomException {
+      rethrow;
+    }
+  }
+
+  Future<String> searchUserToVideoChat({required String uid}) async {
+    try {
+      const _engagementType = EngagegmentType.video;
+
+      int _searchStartTs =
+          await _engagementService.setEngagementStatusToSearching(
+        uid,
+        engagegmentType: _engagementType,
+      );
+
+      // query all the free users
+      List<String> _listOfPotentialUsers = [];
+
+      // Check for potential users every 3 seconds for 3 times. Keeping the users in searching state for 9 seconds
+      // in worst case scenario
+      for (int i = 0; i < 3; i++) {
+        await Future.delayed(Duration(seconds: 3));
+        Engagement _selfEngagement =
+            await _engagementService.queryEngagementRecord(uid: uid);
+
+        // Don't do anything if I have been marked busy by someone else
+        if (_selfEngagement.isBusy) {
+          // Return the room id with which I have been marked busy
+          return _selfEngagement.roomId!;
+        }
+
+        _listOfPotentialUsers = await _engagementService.queryPotentialUsers(
+          idToExclude: uid,
+          engagementType: _engagementType,
+        );
+        if (_listOfPotentialUsers.isNotEmpty) {
+          break;
+        }
+      }
+
+      if (_listOfPotentialUsers.isEmpty) {
+        throw CustomException("No active users found");
+      }
+
+      // pick a user at random
+      String _pickedUserId =
+          Utils.pickRandomValueFromList(_listOfPotentialUsers);
+
+      // Generate a room id
+      String _roomId = Utils.generateRandomId();
+
+      // Check if the pickedUser has been marked busy
+      // If they are marked busy, then query their room id, and store it in a data set
+      Engagement _pickedUserEngagement =
+          await _engagementService.queryEngagementRecord(uid: _pickedUserId);
+
+      if (_pickedUserEngagement.isBusy) {
+        if (_pickedUserEngagement.connectedWith == uid) {
+          return _pickedUserEngagement.roomId!;
+        } else {
+          // If the user was already busy, find another user
+          // Keep finding another user until the list of potential users are empty
+          return searchUserToChat(uid: uid);
+        }
+      }
+
+      if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
+        // We started the search first, so we will assume command
+
+        // If they are not marked busy, then mark them busy, with chat room
+        // mark both the users busy
+        _engagementService.connectUsers(
+          uid: uid,
+          roomId: _roomId,
+          connectedWith: _pickedUserId,
+        );
+
+        ChatRoom _chatRoom = ChatRoom(
+          creatorId: uid,
+          joineeId: _pickedUserId,
+          roomId: _roomId,
+          isEngaged: true,
+          type: 'video',
         );
 
         // if user is un-authenticated

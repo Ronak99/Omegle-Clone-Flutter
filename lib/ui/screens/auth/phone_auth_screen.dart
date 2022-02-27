@@ -18,6 +18,12 @@ class PhoneAuthScreen extends StatelessWidget {
               "Enter Phone Number",
               style: Theme.of(context).textTheme.headline3,
             ),
+            Text(
+              "Verify before proceeding for video chat",
+              style: TextStyle(
+                fontSize: 13,
+              ),
+            ),
             SizedBox(height: 10),
             Column(
               children: [

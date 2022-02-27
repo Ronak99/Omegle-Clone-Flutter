@@ -1,0 +1,4 @@
+enum EngagegmentType{
+  video,
+  chat,
+}
