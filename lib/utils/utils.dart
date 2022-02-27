@@ -36,6 +36,16 @@ class Utils {
     }
   }
 
+  static removeAllAndPush(Widget destination) {
+    try {
+      OneContext().pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => destination),
+          (route) => true);
+    } catch (e) {
+      print("Error while navigating : $e");
+    }
+  }
+
   static warningSnackbar(String msg) => _showSnackbar(
         message: msg,
         snackbarType: SnackbarType.warning,

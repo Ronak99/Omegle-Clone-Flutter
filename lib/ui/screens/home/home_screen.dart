@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/states/chat_data.dart';
+import 'package:omegle_clone/ui/screens/auth/phone_auth_screen.dart';
+import 'package:omegle_clone/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,21 +24,22 @@ class _HomeScreenState extends State<HomeScreen> {
     _engagementData = Provider.of<EngagementData>(context, listen: false);
 
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      _userData.initialize();
-      _engagementData.initialize(_userData.getUser!.uid);
-      setState(() {});
+      String initializedUserId = _userData.initialize();
+      print('initialized user id : $initializedUserId');
+      _engagementData.initialize(initializedUserId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     ChatData _chatData = Provider.of<ChatData>(context);
+    UserData _userData = Provider.of<UserData>(context);
 
     return Scaffold(
       body: Container(
         width: double.infinity,
         child: _userData.getUser == null
-            ? SizedBox()
+            ? Center(child: Text("User was null"))
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -51,6 +54,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           },
                         ),
+                  if (!_userData.getUser!.isAuthenticated)
+                    TextButton(
+                      child: Text('Sign In With Phone'),
+                      onPressed: () => Utils.navigateTo(PhoneAuthScreen()),
+                    ),
                 ],
               ),
       ),

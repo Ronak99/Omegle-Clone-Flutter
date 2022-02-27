@@ -21,5 +21,8 @@ class AuthenticatedUser extends BaseUser {
 
 class UnAuthenticatedUser extends BaseUser {
   UnAuthenticatedUser()
-      : super(uid: Utils.generateRandomId(), userType: UserType.authenticated);
+      : super(
+          uid: Utils.generateRandomId(),
+          userType: UserType.unauthenticated,
+        );
 }
