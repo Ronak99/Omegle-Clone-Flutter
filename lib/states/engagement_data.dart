@@ -8,19 +8,12 @@ import 'package:omegle_clone/services/engagement_service.dart';
 
 class EngagementData extends ChangeNotifier {
   final EngagementService _engagementService = EngagementService();
-  late Engagement _engagement;
-  Engagement get engagement => _engagement;
+  Engagement? _engagement;
+  Engagement? get engagement => _engagement;
   late StreamSubscription<DocumentSnapshot<Engagement>> _engagementStreamSub;
 
   initialize(uid) async {
     // create initial engagement record
-    _engagement = Engagement(
-      uid: uid,
-      engagementStatus: EngagementStatus.free,
-    );
-
-    await _engagementService.createInitialEngagementRecord(uid: uid);
-
     _engagementStreamSub = _engagementService
         .userEngagementStream(uid: uid)
         .listen((engagementDoc) {

@@ -31,10 +31,18 @@ class ChatData extends ChangeNotifier {
   StreamSubscription<QuerySnapshot<Message>>? _messageSubscription;
   StreamSubscription<DocumentSnapshot<ChatRoom>>? _chatRoomSubscription;
 
-  searchRandomUser({required String currentUserId}) async {
+  searchRandomUser(
+      {required String currentUserId, required bool isEngagementNull}) async {
     _isSearching = true;
     notifyListeners();
     try {
+      if (isEngagementNull) {
+        // if engagement has not yet been set
+        await _engagementService.createInitialEngagementRecord(
+          uid: currentUserId,
+        );
+      }
+
       String _roomId =
           await _randomChatService.searchUserToChat(uid: currentUserId);
       Utils.navigateTo(ChatScreen(roomId: _roomId));

@@ -24,9 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _engagementData = Provider.of<EngagementData>(context, listen: false);
 
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      String initializedUserId = _userData.initialize();
-      print('initialized user id : $initializedUserId');
-      _engagementData.initialize(initializedUserId);
+      _userData.initialize();
+      Future.delayed(Duration(seconds: 2), () {
+        _engagementData.initialize(_userData.getUser!.uid);
+      });
     });
   }
 
@@ -51,6 +52,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () {
                             _chatData.searchRandomUser(
                               currentUserId: _userData.getUser!.uid,
+                              isEngagementNull:
+                                  _engagementData.engagement == null,
                             );
                           },
                         ),

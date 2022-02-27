@@ -52,7 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
         return await _backButtonData.showGoBack(
           () => _chatData.closeChatRoomAndReset(
-            _engagementData.engagement.uid,
+            _engagementData.engagement!.uid,
           ),
         );
       },
@@ -71,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: Text("Leave Room"),
                   onPressed: () async {
                     await _chatData.closeChatRoomAndReset(
-                      _engagementData.engagement.uid,
+                      _engagementData.engagement!.uid,
                     );
                     Navigator.pop(context);
                   },
@@ -114,6 +114,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         onPressed: () {
                           _chatData.searchRandomUser(
                             currentUserId: _userData.getUser!.uid,
+                            isEngagementNull: false,
                           );
                           _chatData.deleteRoom();
                           Utils.pop();
@@ -152,7 +153,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       onPressed: () => _chatData.onSendMessageButtonTap(
                         uid: _userData.getUser!.uid,
-                        roomId: _engagementData.engagement.roomId!,
+                        roomId: _engagementData.engagement!.roomId!,
                       ),
                     ),
                   ],

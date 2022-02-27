@@ -11,20 +11,17 @@ class UserData extends ChangeNotifier {
 
   BaseUser? get getUser => _authenticatedUser ?? _unAuthenticatedUser;
 
-  String initialize() {
-    _unAuthenticatedUser = UnAuthenticatedUser();
-    notifyListeners();
-
+  initialize() {
     _authService.authChanges().listen((user) {
       if (user != null) {
         _authenticatedUser = AuthenticatedUser(
           uid: user.uid,
           phoneNumber: user.phoneNumber!,
         );
-        notifyListeners();
+      } else {
+        _unAuthenticatedUser = UnAuthenticatedUser();
       }
+      notifyListeners();
     });
-
-    return _unAuthenticatedUser!.uid;
   }
 }
