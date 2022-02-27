@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       _userData.initialize();
-      _engagementData.initialize(_userData.unAuthenticatedUser!.uid);
+      _engagementData.initialize(_userData.getUser!.uid);
       setState(() {});
     });
   }
@@ -35,19 +35,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        child: _userData.unAuthenticatedUser == null
+        child: _userData.getUser == null
             ? SizedBox()
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(_userData.unAuthenticatedUser!.uid),
+                  Text(_userData.getUser!.uid),
                   _chatData.isSearching
                       ? CircularProgressIndicator()
                       : TextButton(
                           child: Text('Search Chat'),
                           onPressed: () {
                             _chatData.searchRandomUser(
-                              currentUserId: _userData.unAuthenticatedUser!.uid,
+                              currentUserId: _userData.getUser!.uid,
                             );
                           },
                         ),

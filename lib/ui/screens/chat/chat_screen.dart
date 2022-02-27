@@ -94,7 +94,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemBuilder: (context, i) {
                       return ChatBubble(
                         message: provider.getMessages![i],
-                        currentUserId: _userData.unAuthenticatedUser!.uid,
+                        currentUserId: _userData.getUser!.uid,
                       );
                     },
                   );
@@ -113,7 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Text("Search another chat"),
                         onPressed: () {
                           _chatData.searchRandomUser(
-                            currentUserId: _userData.unAuthenticatedUser!.uid,
+                            currentUserId: _userData.getUser!.uid,
                           );
                           _chatData.deleteRoom();
                           Utils.pop();
@@ -151,7 +151,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         color: Colors.blue,
                       ),
                       onPressed: () => _chatData.onSendMessageButtonTap(
-                        uid: _userData.unAuthenticatedUser!.uid,
+                        uid: _userData.getUser!.uid,
                         roomId: _engagementData.engagement.roomId!,
                       ),
                     ),
