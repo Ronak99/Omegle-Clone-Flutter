@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
-import 'package:omegle_clone/states/user_state.dart';
+import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/states/chat_data.dart';
 import 'package:provider/provider.dart';
 

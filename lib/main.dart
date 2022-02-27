@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/states/chat_data.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
-import 'package:omegle_clone/states/user_state.dart';
+import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/ui/screens/home/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:one_context/one_context.dart';
