@@ -53,4 +53,12 @@ class AuthService {
       throw CustomException(err.message!);
     }
   }
+
+  Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+    } on FirebaseAuthException catch (e) {
+      throw CustomException(e.message!);
+    }
+  }
 }

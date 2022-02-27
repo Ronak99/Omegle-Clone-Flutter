@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:omegle_clone/states/auth_data.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/states/chat_data.dart';
@@ -61,6 +62,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     TextButton(
                       child: Text('Sign In With Phone'),
                       onPressed: () => Utils.navigateTo(PhoneAuthScreen()),
+                    ),
+                  if (_userData.getUser!.isAuthenticated)
+                    TextButton(
+                      child: Text('Logout'),
+                      onPressed: () =>
+                          Provider.of<AuthData>(context, listen: false)
+                              .signOut(),
                     ),
                 ],
               ),

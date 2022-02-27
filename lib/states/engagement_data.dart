@@ -17,8 +17,10 @@ class EngagementData extends ChangeNotifier {
     _engagementStreamSub = _engagementService
         .userEngagementStream(uid: uid)
         .listen((engagementDoc) {
-      _engagement = engagementDoc.data()!;
-      notifyListeners();
+      if (engagementDoc.data() != null) {
+        _engagement = engagementDoc.data()!;
+        notifyListeners();
+      }
     });
   }
 }

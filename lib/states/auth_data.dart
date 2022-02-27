@@ -94,4 +94,12 @@ class AuthData extends ChangeNotifier {
 
     setFree();
   }
+
+  signOut() async {
+    try {
+      await _authService.signOut();
+    } on CustomException catch (e) {
+      Utils.errorSnackbar(e.message);
+    }
+  }
 }

@@ -13,15 +13,18 @@ class UserData extends ChangeNotifier {
 
   initialize() {
     _authService.authChanges().listen((user) {
+      print('inside auth state changed : ${user == null}');
       if (user != null) {
         _authenticatedUser = AuthenticatedUser(
           uid: user.uid,
           phoneNumber: user.phoneNumber!,
         );
+        notifyListeners();
       } else {
+        _authenticatedUser = null;
         _unAuthenticatedUser = UnAuthenticatedUser();
+        notifyListeners();
       }
-      notifyListeners();
     });
   }
 }
