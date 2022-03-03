@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:omegle_clone/api/agora_api.dart';
 import 'package:omegle_clone/enums/engagement_status.dart';
 import 'package:omegle_clone/enums/engagement_type.dart';
 import 'package:omegle_clone/extensions/engagement_status_extension.dart';
@@ -67,7 +68,7 @@ class EngagementService {
     }
   }
 
-  connectUsers({
+  connectChatUsers({
     required String uid,
     required String roomId,
     required String connectedWith,
@@ -85,6 +86,38 @@ class EngagementService {
       });
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
+    }
+  }
+
+  connectVideoChatUsers({
+    required String uid,
+    required String roomId,
+    required String connectedWith,
+  }) async {
+    try {
+      AgoraApi _agoraApi = AgoraApi();
+
+      String _localUserRoomToken =
+          await _agoraApi.getRtcRoomToken(uid: uid, channelName: roomId);
+      String _remoteUserRoomToken = await _agoraApi.getRtcRoomToken(
+          uid: connectedWith, channelName: roomId);
+
+      await FirestoreRefs.engagementCollection.doc(uid).update({
+        'status': EngagementStatus.busy.toRawValue,
+        'room_id': roomId,
+        'connected_with': connectedWith,
+        'room_token': _localUserRoomToken,
+      });
+      await FirestoreRefs.engagementCollection.doc(connectedWith).update({
+        'status': EngagementStatus.busy.toRawValue,
+        'room_id': roomId,
+        'connected_with': uid,
+        'room_token': _remoteUserRoomToken,
+      });
+    } on FirebaseException catch (e) {
+      throw CustomException(e.message!);
+    } on CustomException {
+      rethrow;
     }
   }
 

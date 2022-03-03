@@ -78,7 +78,7 @@ class RandomChatService {
 
         // If they are not marked busy, then mark them busy, with chat room
         // mark both the users busy
-        _engagementService.connectUsers(
+        _engagementService.connectChatUsers(
           uid: uid,
           roomId: _roomId,
           connectedWith: _pickedUserId,
@@ -174,7 +174,7 @@ class RandomChatService {
 
         // If they are not marked busy, then mark them busy, with chat room
         // mark both the users busy
-        _engagementService.connectUsers(
+        _engagementService.connectVideoChatUsers(
           uid: uid,
           roomId: _roomId,
           connectedWith: _pickedUserId,

@@ -4,6 +4,7 @@ import 'package:omegle_clone/states/auth_data.dart';
 import 'package:omegle_clone/states/chat_data.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
+import 'package:omegle_clone/states/video_call_data.dart';
 import 'package:omegle_clone/ui/screens/home/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:one_context/one_context.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<ChatData>(create: (_) => ChatData()),
         ChangeNotifierProvider<EngagementData>(create: (_) => EngagementData()),
         ChangeNotifierProvider<AuthData>(create: (_) => AuthData()),
+        ChangeNotifierProvider<VideoCallData>(create: (_) => VideoCallData()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

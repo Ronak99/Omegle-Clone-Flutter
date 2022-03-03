@@ -1,15 +1,20 @@
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/constants/agora_config.dart';
+import 'package:omegle_clone/utils/utils.dart';
 
 class VideoCallData extends ChangeNotifier {
   final AgoraConfig _agoraConfig = AgoraConfig();
 
   late RtcEngine _rtcEngine;
-  String? roomId;
-  String? rtmToken;
+  int? joineeId;
 
-  initialize(context) async {
+  initialize(
+    context, {
+    required String roomId,
+    required String rtcToken,
+    required String uid,
+  }) async {
     // initialize rtc engine
     _rtcEngine =
         await RtcEngine.createWithContext(RtcEngineContext(_agoraConfig.appId));
@@ -35,15 +40,24 @@ class VideoCallData extends ChangeNotifier {
       ),
     );
 
-    _joinChannel();
+    _joinChannel(
+      roomId: roomId,
+      rtcToken: rtcToken,
+      uid: uid,
+    );
   }
 
-  _joinChannel() async {
-    await _rtcEngine.joinChannel(
-      rtmToken,
-      roomId!,
-      null,
-      0,
+  _joinChannel({
+    required String roomId,
+    required String rtcToken,
+    required String uid,
+  }) async {
+    Utils.successSnackbar('joined room : $roomId');
+
+    await _rtcEngine.joinChannelWithUserAccount(
+      rtcToken,
+      roomId,
+      uid,
     );
   }
 
@@ -64,7 +78,12 @@ class VideoCallData extends ChangeNotifier {
   }
 
   _localUserJoinedHandler(uid, _, __) async {}
-  _remoteUserJoinedHandler(uid, _) async {}
+  _remoteUserJoinedHandler(uid, _) async {
+    Utils.successSnackbar('remote user with uid : $uid');
+    joineeId = uid;
+    notifyListeners();
+  }
+
   _remoteVideoStatsHandler(RemoteVideoStats stats) {}
   _onRemoteAudioChanged(uid, audioState, reason, elapsed) {
     switch (reason) {
@@ -99,5 +118,11 @@ class VideoCallData extends ChangeNotifier {
       case LocalVideoStreamState.Failed:
         break;
     }
+  }
+
+  reset() async {
+    await _rtcEngine.leaveChannel();
+    await _rtcEngine.destroy();
+    joineeId = null;
   }
 }

@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     TextButton(
                       child: Text('Find Video Chat'),
                       onPressed: () {
-                        _chatData.searchRandomUser(
+                        _chatData.searchRandomVideoChatUser(
                           currentUserId: _userData.getUser!.uid,
                           isEngagementNull: _engagementData.engagement == null,
                         );
