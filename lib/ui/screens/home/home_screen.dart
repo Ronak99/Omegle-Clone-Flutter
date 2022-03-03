@@ -66,7 +66,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (_userData.getUser!.isAuthenticated)
                     TextButton(
                       child: Text('Find Video Chat'),
-                      onPressed: () => Utils.navigateTo(PhoneAuthScreen()),
+                      onPressed: () {
+                        _chatData.searchRandomUser(
+                          currentUserId: _userData.getUser!.uid,
+                          isEngagementNull: _engagementData.engagement == null,
+                        );
+                      },
                     ),
                   if (_userData.getUser!.isAuthenticated)
                     TextButton(
