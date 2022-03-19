@@ -1,3 +1,5 @@
+import '../constants/strings.dart';
+
 class ChatRoom {
   String roomId;
   String creatorId;
@@ -35,4 +37,6 @@ class ChatRoom {
       closedBy: map['closed_by'],
     );
   }
+
+  bool get isVideoRoom => type == CHAT_ROOM_TYPE_VIDEO;
 }

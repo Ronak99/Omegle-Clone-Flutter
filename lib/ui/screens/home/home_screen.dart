@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/states/auth_data.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
+import 'package:omegle_clone/states/room/chat_room_data.dart';
+import 'package:omegle_clone/states/room/room_data.dart';
+import 'package:omegle_clone/states/room/video_room_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
-import 'package:omegle_clone/states/chat_data.dart';
 import 'package:omegle_clone/ui/screens/auth/phone_auth_screen.dart';
 import 'package:omegle_clone/utils/utils.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ChatData _chatData = Provider.of<ChatData>(context);
+    ChatRoomData _chatRoomData = Provider.of<ChatRoomData>(context);
     UserData _userData = Provider.of<UserData>(context);
 
     return Scaffold(
@@ -46,12 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(_userData.getUser!.uid),
-                  _chatData.isSearching
+                  _chatRoomData.isSearching
                       ? CircularProgressIndicator()
                       : TextButton(
                           child: Text('Search Chat'),
                           onPressed: () {
-                            _chatData.searchRandomUser(
+                            Provider.of<ChatRoomData>(context).searchRandomUser(
                               currentUserId: _userData.getUser!.uid,
                               isEngagementNull:
                                   _engagementData.engagement == null,
@@ -67,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     TextButton(
                       child: Text('Find Video Chat'),
                       onPressed: () {
-                        _chatData.searchRandomVideoChatUser(
+                        Provider.of<VideoRoomData>(context).searchRandomUser(
                           currentUserId: _userData.getUser!.uid,
                           isEngagementNull: _engagementData.engagement == null,
                         );

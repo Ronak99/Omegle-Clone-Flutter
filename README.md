@@ -30,8 +30,6 @@ Omegle Clone is an.. Omegle like app
 1. When user leaves the chat screen
 2. When user closes the app
 
-
-
 ## Viewing Friends
 1. Friends can be seen listed within the friends tab
 2. Users can click and continue chatting from where they left off

@@ -4,21 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/message.dart';
-import 'package:omegle_clone/services/engagement_service.dart';
-import 'package:omegle_clone/services/random_chat_service.dart';
-import 'package:omegle_clone/ui/screens/call/call_screen.dart';
 import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
-import 'package:omegle_clone/utils/firestore_refs.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
-class ChatData extends ChangeNotifier {
-  final EngagementService _engagementService = EngagementService();
-  final RandomChatService _randomChatService = RandomChatService();
+import 'room_data.dart';
 
-  bool _isSearching = false;
-  bool get isSearching => _isSearching;
-
+class ChatRoomData extends RoomData {
   List<Message>? _messageList;
   List<Message>? get getMessages => _messageList;
 
@@ -32,50 +24,27 @@ class ChatData extends ChangeNotifier {
   StreamSubscription<QuerySnapshot<Message>>? _messageSubscription;
   StreamSubscription<DocumentSnapshot<ChatRoom>>? _chatRoomSubscription;
 
-  searchRandomUser(
-      {required String currentUserId, required bool isEngagementNull}) async {
-    _isSearching = true;
-    notifyListeners();
+  searchRandomUser({
+    required String currentUserId,
+    required bool isEngagementNull,
+  }) async {
+    setSearchToTrue();
     try {
       if (isEngagementNull) {
         // if engagement has not yet been set
-        await _engagementService.createInitialEngagementRecord(
+        await engagementService.createInitialEngagementRecord(
           uid: currentUserId,
         );
       }
 
       String _roomId =
-          await _randomChatService.searchUserToChat(uid: currentUserId);
+          await randomChatService.searchUserToChat(uid: currentUserId);
       Utils.navigateTo(ChatScreen(roomId: _roomId));
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
-      _engagementService.markUserFree(uid: currentUserId);
+      engagementService.markUserFree(uid: currentUserId);
     }
-    _isSearching = false;
-    notifyListeners();
-  }
-
-  searchRandomVideoChatUser(
-      {required String currentUserId, required bool isEngagementNull}) async {
-    _isSearching = true;
-    notifyListeners();
-    try {
-      if (isEngagementNull) {
-        // if engagement has not yet been set
-        await _engagementService.createInitialEngagementRecord(
-          uid: currentUserId,
-        );
-      }
-
-      String _roomId =
-          await _randomChatService.searchUserToVideoChat(uid: currentUserId);
-      Utils.navigateTo(CallScreen(roomId: _roomId));
-    } on CustomException catch (e) {
-      Utils.errorSnackbar(e.message);
-      _engagementService.markUserFree(uid: currentUserId);
-    }
-    _isSearching = false;
-    notifyListeners();
+    setSearchToFalse();
   }
 
   onSendMessageButtonTap({
@@ -98,7 +67,7 @@ class ChatData extends ChangeNotifier {
     messageFieldController.text = '';
 
     try {
-      await _randomChatService.sendMessage(message: _message);
+      await randomChatService.sendMessage(message: _message);
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
     }
@@ -106,23 +75,25 @@ class ChatData extends ChangeNotifier {
 
   intializeMessageList({required String roomId}) {
     _messageSubscription =
-        _randomChatService.queryRoomChat(roomId: roomId).listen((messageQuery) {
+        randomChatService.queryRoomChat(roomId: roomId).listen((messageQuery) {
       _messageList = messageQuery.docs.map((e) => e.data()).toList();
       notifyListeners();
     });
   }
 
   initializeChatRoom({required String roomId}) {
-    _chatRoomSubscription = _randomChatService
+    _chatRoomSubscription = randomChatService
         .chatRoomStream(roomId: roomId)
         .listen((chatRoomValue) {
       _chatRoom = chatRoomValue.data();
 
+      if (_chatRoom == null) return;
+
       if (!_chatRoom!.isEngaged) {
         // When the chat room becomes unengaged
         // Mark the joinee and creator free
-        _engagementService.markUserFree(uid: _chatRoom!.joineeId);
-        _engagementService.markUserFree(uid: _chatRoom!.creatorId);
+        engagementService.markUserFree(uid: _chatRoom!.joineeId);
+        engagementService.markUserFree(uid: _chatRoom!.creatorId);
 
         _messageSubscription?.cancel();
         _chatRoomSubscription?.cancel();
@@ -132,11 +103,12 @@ class ChatData extends ChangeNotifier {
     });
   }
 
-  _closeChatRoom({required String uid}) async {
+  _closeRoom({required String uid}) async {
     try {
-      await _randomChatService.closeChatRoom(
+      await randomChatService.closeChatRoom(
         uid: uid,
         roomId: _chatRoom!.roomId,
+        isVideoRoom: false,
       );
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
@@ -144,10 +116,13 @@ class ChatData extends ChangeNotifier {
   }
 
   deleteRoom() {
-    _randomChatService.deleteChatRoom(roomId: _chatRoom!.roomId);
+    randomChatService.deleteChatRoom(
+      roomId: _chatRoom!.roomId,
+      isVideoRoom: false,
+    );
   }
 
-  closeChatRoomAndReset(String uid) async {
+  closeRoomAndReset(String uid) async {
     // if this room was already closed
     if (!_chatRoom!.isEngaged) {
       // Delete room
@@ -156,7 +131,7 @@ class ChatData extends ChangeNotifier {
       _reset();
     } else {
       // close the room
-      await _closeChatRoom(uid: uid);
+      await _closeRoom(uid: uid);
       // reset
       _reset();
     }

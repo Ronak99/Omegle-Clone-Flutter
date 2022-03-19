@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:omegle_clone/enums/engagement_status.dart';
 import 'package:omegle_clone/enums/engagement_type.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/engagement.dart';
@@ -206,15 +205,22 @@ class RandomChatService {
 
   createChatRoom({required ChatRoom chatRoom}) async {
     try {
-      await FirestoreRefs.chatRoomCollection.doc(chatRoom.roomId).set(chatRoom);
+      await FirestoreRefs.getChatRoomCollection(
+        isVideoRoom: chatRoom.isVideoRoom,
+      ).doc(chatRoom.roomId).set(chatRoom);
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
     }
   }
 
-  closeChatRoom({required String roomId, required String uid}) async {
+  closeChatRoom(
+      {required String roomId,
+      required String uid,
+      required bool isVideoRoom}) async {
     try {
-      await FirestoreRefs.chatRoomCollection.doc(roomId).update({
+      await FirestoreRefs.getChatRoomCollection(isVideoRoom: isVideoRoom)
+          .doc(roomId)
+          .update({
         'closed_by': uid,
         'closed_on': DateTime.now().millisecondsSinceEpoch,
         'is_engaged': false,
@@ -224,7 +230,7 @@ class RandomChatService {
     }
   }
 
-  deleteChatRoom({required String roomId}) async {
+  deleteChatRoom({required String roomId, required bool isVideoRoom}) async {
     try {
       QuerySnapshot<Message> _messageList =
           await FirestoreRefs.getRoomMessageCollection(roomId: roomId).get();
@@ -235,7 +241,9 @@ class RandomChatService {
             .delete();
       }
 
-      await FirestoreRefs.chatRoomCollection.doc(roomId).delete();
+      await FirestoreRefs.getChatRoomCollection(isVideoRoom: isVideoRoom)
+          .doc(roomId)
+          .delete();
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
     }
@@ -257,6 +265,8 @@ class RandomChatService {
   }
 
   Stream<DocumentSnapshot<ChatRoom>> chatRoomStream({required String roomId}) {
-    return FirestoreRefs.chatRoomCollection.doc(roomId).snapshots();
+    return FirestoreRefs.getChatRoomCollection(isVideoRoom: false)
+        .doc(roomId)
+        .snapshots();
   }
 }

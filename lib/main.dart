@@ -1,8 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/states/auth_data.dart';
-import 'package:omegle_clone/states/chat_data.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
+import 'package:omegle_clone/states/room/chat_room_data.dart';
+import 'package:omegle_clone/states/room/video_room_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/states/video_call_data.dart';
 import 'package:omegle_clone/ui/screens/home/home_screen.dart';
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<UserData>(create: (_) => UserData()),
-        ChangeNotifierProvider<ChatData>(create: (_) => ChatData()),
+        ChangeNotifierProvider<ChatRoomData>(create: (_) => ChatRoomData()),
+        ChangeNotifierProvider<VideoRoomData>(create: (_) => VideoRoomData()),
         ChangeNotifierProvider<EngagementData>(create: (_) => EngagementData()),
         ChangeNotifierProvider<AuthData>(create: (_) => AuthData()),
         ChangeNotifierProvider<VideoCallData>(create: (_) => VideoCallData()),

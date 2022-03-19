@@ -35,7 +35,7 @@ class Engagement {
 
   factory Engagement.fromMap(Map<String, dynamic> map) {
     String _engagementStatus = map['status']!;
-    String _engagementType = map['type']!;
+    String? _engagementType = map['type'];
 
     return Engagement(
       uid: map['uid'],
@@ -44,7 +44,7 @@ class Engagement {
       engagementStatus: _engagementStatus.toEngagementStatus,
       searchStartedOn: map['search_started_on'],
       connectedWith: map['connected_with'],
-      engagegmentType: _engagementType.toEngagementType,
+      engagegmentType: _engagementType?.toEngagementType,
     );
   }
 

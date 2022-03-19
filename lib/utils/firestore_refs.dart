@@ -13,8 +13,12 @@ class FirestoreRefs {
                 Engagement.fromMap(snapshot.data()!),
             toFirestore: (data, options) => data.toMap(),
           );
-  static CollectionReference<ChatRoom> get chatRoomCollection =>
-      _firestore.collection(CHAT_ROOM_COLLECTION).withConverter(
+  static CollectionReference<ChatRoom> getChatRoomCollection(
+          {required bool isVideoRoom}) =>
+      _firestore
+          .collection(
+              isVideoRoom ? VIDEO_ROOM_COLLECTION : CHAT_ROOM_COLLECTION)
+          .withConverter(
             fromFirestore: (snapshot, options) =>
                 ChatRoom.fromMap(snapshot.data()!),
             toFirestore: (data, options) => data.toMap(),
@@ -22,7 +26,7 @@ class FirestoreRefs {
 
   static CollectionReference<Message> getRoomMessageCollection(
           {required String roomId}) =>
-      chatRoomCollection
+      getChatRoomCollection(isVideoRoom: false)
           .doc(roomId)
           .collection(MESSAGES_COLLECTION)
           .withConverter(
