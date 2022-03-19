@@ -127,29 +127,30 @@ class _CallScreenState extends State<CallScreen> {
                 ),
               ],
             ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: GestureDetector(
-                onTap: () {
-                  _videoCallData.leaveChannel();
-                },
-                child: Container(
-                  margin: EdgeInsets.only(right: 25, bottom: 25),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                  child: Text(
-                    "Next",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
+            if (_videoCallData.remoteUserAgoraId != null)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  onTap: () {
+                    _videoCallData.leaveChannel();
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(right: 25, bottom: 25),
+                    decoration: BoxDecoration(
+                      color: Colors.amber,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    child: Text(
+                      "Next",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
