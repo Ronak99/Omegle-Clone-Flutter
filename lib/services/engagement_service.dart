@@ -41,6 +41,7 @@ class EngagementService {
         'status': EngagementStatus.free.toRawValue,
         'search_started_on': null,
         'room_id': null,
+        'room_token': null,
         'connected_with': null,
         'type': null,
       });

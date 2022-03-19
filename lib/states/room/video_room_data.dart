@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/ui/screens/call/call_screen.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
@@ -17,8 +18,8 @@ class VideoRoomData extends RoomData {
   searchRandomUser({
     required String currentUserId,
     required bool isEngagementNull,
+    required VoidCallback onUserFound,
   }) async {
-    setSearchToTrue();
     try {
       if (isEngagementNull) {
         // if engagement has not yet been set
@@ -29,36 +30,27 @@ class VideoRoomData extends RoomData {
 
       String _roomId =
           await randomChatService.searchUserToVideoChat(uid: currentUserId);
-      Utils.navigateTo(CallScreen(roomId: _roomId));
+
+      onUserFound();
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
       engagementService.markUserFree(uid: currentUserId);
+      rethrow;
     }
-    setSearchToFalse();
   }
 
   initializeChatRoom({required String roomId}) {
+    _chatRoomSubscription?.cancel();
     _chatRoomSubscription = randomChatService
-        .chatRoomStream(roomId: roomId)
+        .chatRoomStream(roomId: roomId, isVideoRoom: true)
         .listen((chatRoomValue) {
       _chatRoom = chatRoomValue.data();
-
       if (_chatRoom == null) return;
-
-      if (!_chatRoom!.isEngaged) {
-        // When the chat room becomes unengaged
-        // Mark the joinee and creator free
-        engagementService.markUserFree(uid: _chatRoom!.joineeId);
-        engagementService.markUserFree(uid: _chatRoom!.creatorId);
-
-        _chatRoomSubscription?.cancel();
-      }
-
       notifyListeners();
     });
   }
 
-  _closeRoom({required String uid}) async {
+  closeRoom({required String uid}) async {
     try {
       await randomChatService.closeChatRoom(
         uid: uid,
@@ -68,6 +60,10 @@ class VideoRoomData extends RoomData {
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
     }
+  }
+
+  _markUserFree(String uid) {
+    engagementService.markUserFree(uid: uid);
   }
 
   deleteRoom() {
@@ -85,8 +81,10 @@ class VideoRoomData extends RoomData {
 
       _reset();
     } else {
+      await _markUserFree(uid);
+
       // close the room
-      await _closeRoom(uid: uid);
+      await closeRoom(uid: uid);
       // reset
       _reset();
     }

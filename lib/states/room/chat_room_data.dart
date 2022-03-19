@@ -83,7 +83,10 @@ class ChatRoomData extends RoomData {
 
   initializeChatRoom({required String roomId}) {
     _chatRoomSubscription = randomChatService
-        .chatRoomStream(roomId: roomId)
+        .chatRoomStream(
+      roomId: roomId,
+      isVideoRoom: false,
+    )
         .listen((chatRoomValue) {
       _chatRoom = chatRoomValue.data();
 

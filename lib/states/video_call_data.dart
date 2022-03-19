@@ -7,19 +7,30 @@ class VideoCallData extends ChangeNotifier {
   final AgoraConfig _agoraConfig = AgoraConfig();
 
   late RtcEngine _rtcEngine;
-  int? joineeId;
+
+  dynamic _localUserAgoraId;
+  int? _remoteUserAgoraId;
+
+  dynamic get localUserAgoraId => _localUserAgoraId;
+  int? get remoteUserAgoraId => _remoteUserAgoraId;
+
+  bool _couldNotFindUsersToChat = false;
+  bool get couldNotFindUsersToChat => _couldNotFindUsersToChat;
+
+  displayNoUsersFoundUI() {
+    _couldNotFindUsersToChat = true;
+    notifyListeners();
+  }
 
   initialize(
     context, {
-    required String roomId,
-    required String rtcToken,
-    required String uid,
+    required VoidCallback onAnyUserLeavesChannel,
   }) async {
     // initialize rtc engine
     _rtcEngine =
         await RtcEngine.createWithContext(RtcEngineContext(_agoraConfig.appId));
 
-    _initializeEventListeners();
+    _initializeEventListeners(onAnyUserLeavesChannel);
 
     await _rtcEngine.enableVideo();
     await _rtcEngine.startPreview();
@@ -39,15 +50,9 @@ class VideoCallData extends ChangeNotifier {
         ),
       ),
     );
-
-    _joinChannel(
-      roomId: roomId,
-      rtcToken: rtcToken,
-      uid: uid,
-    );
   }
 
-  _joinChannel({
+  joinChannel({
     required String roomId,
     required String rtcToken,
     required String uid,
@@ -57,37 +62,48 @@ class VideoCallData extends ChangeNotifier {
       roomId,
       uid,
     );
-
-    // Utils.successSnackbar('joined room : $roomId');
-    //  await _rtcEngine.joinChannel(
-    //   rtcToken,
-    //   roomId,
-    //   null,
-    //   0,
-    // );
   }
 
-  _initializeEventListeners() {
+  leaveChannel() async {
+    await _rtcEngine.leaveChannel();
+  }
+
+  _onLeavingChannel(VoidCallback onAnyUserLeavesChannel) {
+    _remoteUserAgoraId = null;
+    onAnyUserLeavesChannel();
+  }
+
+  _initializeEventListeners(VoidCallback onAnyUserLeavesChannel) {
     _rtcEngine.setEventHandler(
       RtcEngineEventHandler(
         joinChannelSuccess: _localUserJoinedHandler,
         userJoined: _remoteUserJoinedHandler,
         remoteVideoStats: _remoteVideoStatsHandler,
-        userOffline: (int uid, UserOfflineReason reason) {},
+        userOffline: (int uid, UserOfflineReason reason) async {
+          _onLeavingChannel(onAnyUserLeavesChannel);
+
+          // even local user should leave this channel
+          await leaveChannel();
+        },
         // leaveChannel: _localUserLeaveHandler,
         rejoinChannelSuccess: (String str, int a, int b) {},
         remoteAudioStateChanged: _onRemoteAudioChanged,
         remoteVideoStateChanged: _onRemoteVideoChanged,
         localVideoStateChanged: _onLocalVideoStateChanged,
+        leaveChannel: (_) async =>
+            await _onLeavingChannel(onAnyUserLeavesChannel),
       ),
     );
   }
 
-  _localUserJoinedHandler(uid, _, __) async {}
+  _localUserJoinedHandler(uid, _, __) async {
+    _localUserAgoraId = uid;
+    notifyListeners();
+  }
 
   _remoteUserJoinedHandler(uid, _) async {
     // Utils.successSnackbar('remote user with uid : $uid');
-    joineeId = uid;
+    _remoteUserAgoraId = uid;
     notifyListeners();
   }
 
@@ -130,6 +146,8 @@ class VideoCallData extends ChangeNotifier {
   reset() async {
     await _rtcEngine.leaveChannel();
     await _rtcEngine.destroy();
-    joineeId = null;
+    _remoteUserAgoraId = null;
+    _localUserAgoraId = null;
+    _couldNotFindUsersToChat = false;
   }
 }

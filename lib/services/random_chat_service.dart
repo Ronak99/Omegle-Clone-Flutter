@@ -264,8 +264,9 @@ class RandomChatService {
         .snapshots();
   }
 
-  Stream<DocumentSnapshot<ChatRoom>> chatRoomStream({required String roomId}) {
-    return FirestoreRefs.getChatRoomCollection(isVideoRoom: false)
+  Stream<DocumentSnapshot<ChatRoom>> chatRoomStream(
+      {required String roomId, required bool isVideoRoom}) {
+    return FirestoreRefs.getChatRoomCollection(isVideoRoom: isVideoRoom)
         .doc(roomId)
         .snapshots();
   }
