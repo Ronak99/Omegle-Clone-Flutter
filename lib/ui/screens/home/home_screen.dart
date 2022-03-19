@@ -6,6 +6,7 @@ import 'package:omegle_clone/states/room/room_data.dart';
 import 'package:omegle_clone/states/room/video_room_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/ui/screens/auth/phone_auth_screen.dart';
+import 'package:omegle_clone/ui/screens/call/call_screen.dart';
 import 'package:omegle_clone/utils/utils.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ChatRoomData _chatRoomData = Provider.of<ChatRoomData>(context);
     UserData _userData = Provider.of<UserData>(context);
 
     return Scaffold(
@@ -48,18 +48,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(_userData.getUser!.uid),
-                  _chatRoomData.isSearching
-                      ? CircularProgressIndicator()
-                      : TextButton(
-                          child: Text('Search Chat'),
-                          onPressed: () {
-                            Provider.of<ChatRoomData>(context).searchRandomUser(
-                              currentUserId: _userData.getUser!.uid,
-                              isEngagementNull:
-                                  _engagementData.engagement == null,
-                            );
-                          },
-                        ),
+                  TextButton(
+                    child: Text('Search Chat'),
+                    onPressed: () {
+                      Provider.of<ChatRoomData>(context, listen: false)
+                          .searchRandomUser(
+                        currentUserId: _userData.getUser!.uid,
+                        isEngagementNull: _engagementData.engagement == null,
+                      );
+                    },
+                  ),
                   if (!_userData.getUser!.isAuthenticated)
                     TextButton(
                       child: Text('Find Video Chat'),
@@ -69,10 +67,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     TextButton(
                       child: Text('Find Video Chat'),
                       onPressed: () {
-                        Provider.of<VideoRoomData>(context).searchRandomUser(
-                          currentUserId: _userData.getUser!.uid,
-                          isEngagementNull: _engagementData.engagement == null,
-                        );
+                        Utils.navigateTo(CallScreen());
+                        // Provider.of<VideoRoomData>(context, listen: false)
+                        //     .searchRandomUser(
+                        //   currentUserId: _userData.getUser!.uid,
+                        //   isEngagementNull: _engagementData.engagement == null,
+                        // );
                       },
                     ),
                   if (_userData.getUser!.isAuthenticated)

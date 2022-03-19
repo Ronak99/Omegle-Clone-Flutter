@@ -77,7 +77,7 @@ class VideoRoomData extends RoomData {
     );
   }
 
-  closeChatRoomAndReset(String uid) async {
+  closeRoomAndReset(String uid) async {
     // if this room was already closed
     if (!_chatRoom!.isEngaged) {
       // Delete room

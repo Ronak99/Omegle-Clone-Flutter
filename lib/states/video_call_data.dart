@@ -58,7 +58,7 @@ class VideoCallData extends ChangeNotifier {
       uid,
     );
 
-    Utils.successSnackbar('joined room : $roomId');
+    // Utils.successSnackbar('joined room : $roomId');
     //  await _rtcEngine.joinChannel(
     //   rtcToken,
     //   roomId,
@@ -86,7 +86,7 @@ class VideoCallData extends ChangeNotifier {
   _localUserJoinedHandler(uid, _, __) async {}
 
   _remoteUserJoinedHandler(uid, _) async {
-    Utils.successSnackbar('remote user with uid : $uid');
+    // Utils.successSnackbar('remote user with uid : $uid');
     joineeId = uid;
     notifyListeners();
   }

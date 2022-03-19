@@ -18,10 +18,4 @@ abstract class RoomData extends ChangeNotifier {
     _isSearching = false;
     notifyListeners();
   }
-
-  // Search for random users to chat with
-  searchRandomUser({
-    required String currentUserId,
-    required bool isEngagementNull,
-  });
 }
