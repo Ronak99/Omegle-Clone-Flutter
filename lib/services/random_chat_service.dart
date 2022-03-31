@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:omegle_clone/enums/engagement_type.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/engagement.dart';
@@ -11,7 +12,19 @@ import 'package:omegle_clone/utils/utils.dart';
 class RandomChatService {
   final EngagementService _engagementService = EngagementService();
 
-  Future<String> searchUserToChat({required String uid}) async {
+  static bool shouldKeepGoing = true;
+
+  _checkIfShouldKeepGoing() {
+    if (!shouldKeepGoing) {
+      shouldKeepGoing = true;
+      throw CustomException("Stopped searching...");
+    }
+  }
+
+  Future<String> searchUserToChat({
+    required String uid,
+    required VoidCallback onConnectingUsers,
+  }) async {
     try {
       const _engagementType = EngagegmentType.chat;
 
@@ -24,9 +37,13 @@ class RandomChatService {
       // query all the free users
       List<String> _listOfPotentialUsers = [];
 
+      _checkIfShouldKeepGoing();
+
       // Check for potential users every 3 seconds for 3 times. Keeping the users in searching state for 9 seconds
       // in worst case scenario
       for (int i = 0; i < 3; i++) {
+        _checkIfShouldKeepGoing();
+
         await Future.delayed(Duration(seconds: 3));
         Engagement _selfEngagement =
             await _engagementService.queryEngagementRecord(uid: uid);
@@ -45,6 +62,8 @@ class RandomChatService {
           break;
         }
       }
+
+      _checkIfShouldKeepGoing();
 
       if (_listOfPotentialUsers.isEmpty) {
         throw CustomException("No active users found");
@@ -68,12 +87,16 @@ class RandomChatService {
         } else {
           // If the user was already busy, find another user
           // Keep finding another user until the list of potential users are empty
-          return searchUserToChat(uid: uid);
+          return searchUserToChat(
+            uid: uid,
+            onConnectingUsers: onConnectingUsers,
+          );
         }
       }
 
       if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
         // We started the search first, so we will assume command
+        onConnectingUsers();
 
         // If they are not marked busy, then mark them busy, with chat room
         // mark both the users busy
@@ -102,7 +125,7 @@ class RandomChatService {
       // check if the picked user is a friend
       // if they are, make them join the same room
       // else create chat room
-    } on CustomException {
+    } on CustomException catch (e) {
       rethrow;
     }
   }
@@ -117,12 +140,16 @@ class RandomChatService {
         engagegmentType: _engagementType,
       );
 
+      _checkIfShouldKeepGoing();
+
       // query all the free users
       List<String> _listOfPotentialUsers = [];
 
       // Check for potential users every 3 seconds for 3 times. Keeping the users in searching state for 9 seconds
       // in worst case scenario
       for (int i = 0; i < 3; i++) {
+        _checkIfShouldKeepGoing();
+
         await Future.delayed(Duration(seconds: 3));
         Engagement _selfEngagement =
             await _engagementService.queryEngagementRecord(uid: uid);
@@ -141,6 +168,8 @@ class RandomChatService {
           break;
         }
       }
+
+      _checkIfShouldKeepGoing();
 
       if (_listOfPotentialUsers.isEmpty) {
         throw CustomException("No active users found");
@@ -164,9 +193,11 @@ class RandomChatService {
         } else {
           // If the user was already busy, find another user
           // Keep finding another user until the list of potential users are empty
-          return searchUserToChat(uid: uid);
+          return searchUserToVideoChat(uid: uid);
         }
       }
+
+      _checkIfShouldKeepGoing();
 
       if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
         // We started the search first, so we will assume command

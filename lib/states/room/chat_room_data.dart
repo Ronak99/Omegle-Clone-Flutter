@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/message.dart';
+import 'package:omegle_clone/services/random_chat_service.dart';
 import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
@@ -24,10 +25,14 @@ class ChatRoomData extends RoomData {
   StreamSubscription<QuerySnapshot<Message>>? _messageSubscription;
   StreamSubscription<DocumentSnapshot<ChatRoom>>? _chatRoomSubscription;
 
+  bool _shouldShowStopButton = false;
+  bool get shouldShowStopButton => _shouldShowStopButton;
+
   searchRandomUser({
     required String currentUserId,
     required bool isEngagementNull,
   }) async {
+    _shouldShowStopButton = true;
     setSearchToTrue();
     try {
       if (isEngagementNull) {
@@ -37,14 +42,24 @@ class ChatRoomData extends RoomData {
         );
       }
 
-      String _roomId =
-          await randomChatService.searchUserToChat(uid: currentUserId);
+      String _roomId = await randomChatService.searchUserToChat(
+        uid: currentUserId,
+        onConnectingUsers: () {
+          _shouldShowStopButton = false;
+          notifyListeners();
+        },
+      );
       Utils.navigateTo(ChatScreen(roomId: _roomId));
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
       engagementService.markUserFree(uid: currentUserId);
     }
+    _shouldShowStopButton = false;
     setSearchToFalse();
+  }
+
+  stopSearchingUser() {
+    RandomChatService.shouldKeepGoing = false;
   }
 
   onSendMessageButtonTap({
