@@ -37,7 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   _initializeMessageList() async {
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _chatData.initializeChatRoom(roomId: widget.roomId);
       _chatData.intializeMessageList(roomId: widget.roomId);
     });
@@ -88,10 +88,12 @@ class _ChatScreenState extends State<ChatScreen> {
                   Expanded(
                     child: Builder(
                       builder: (context) {
-                        if (_chatData.getMessages == null)
+                        if (_chatData.getMessages == null) {
                           return Center(child: CircularProgressIndicator());
-                        if (_chatData.getMessages!.isEmpty)
+                        }
+                        if (_chatData.getMessages!.isEmpty) {
                           return Center(child: Text('Send the first message'));
+                        }
 
                         return ListView.builder(
                           itemCount: _chatData.getMessages!.length,

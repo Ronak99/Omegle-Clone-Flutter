@@ -1,7 +1,5 @@
-import 'package:agora_rtc_engine/rtc_channel.dart';
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
-import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
-import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
 import 'package:omegle_clone/states/back_button_data.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/room/video_room_data.dart';
@@ -70,7 +68,7 @@ class _CallScreenState extends State<CallScreen> {
         rtcToken: _engagementData.engagement!.roomToken!,
         uid: _userData.getUser!.uid,
       );
-    } on CustomException catch (e) {
+    } on CustomException {
       _videoCallData.displayNoUsersFoundUI();
     }
   }
@@ -114,16 +112,29 @@ class _CallScreenState extends State<CallScreen> {
                 Expanded(
                   child: (_engagementData.engagement?.roomId != null &&
                           _videoCallData.remoteUserAgoraId != null)
-                      ? RtcRemoteView.SurfaceView(
-                          channelId: _engagementData.engagement!.roomId!,
-                          uid: _videoCallData.remoteUserAgoraId!,
+                      ? AgoraVideoView(
+                          controller: VideoViewController.remote(
+                            rtcEngine: _videoCallData.getAgoraEngine,
+                            canvas: VideoCanvas(
+                                uid: _videoCallData.remoteUserAgoraId!),
+                            connection: RtcConnection(
+                              channelId: _engagementData.engagement!.roomId!,
+                            ),
+                          ),
                         )
                       : Center(child: CircularProgressIndicator()),
                 ),
                 Expanded(
                   child: _videoCallData.localUserAgoraId == null
                       ? Center(child: CircularProgressIndicator())
-                      : RtcLocalView.SurfaceView(),
+                      : AgoraVideoView(
+                          controller: VideoViewController(
+                            rtcEngine: _videoCallData.getAgoraEngine,
+                            canvas: VideoCanvas(
+                              uid: _videoCallData.localUserAgoraId,
+                            ),
+                          ),
+                        ),
                 ),
               ],
             ),
