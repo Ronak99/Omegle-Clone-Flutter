@@ -1,12 +1,12 @@
-import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/constants/agora_config.dart';
-import 'package:omegle_clone/utils/utils.dart';
 
 class VideoCallData extends ChangeNotifier {
   final AgoraConfig _agoraConfig = AgoraConfig();
 
-  late RtcEngine _rtcEngine;
+  late RtcEngine _engine;
+  RtcEngine get getAgoraEngine => _engine;
 
   dynamic _localUserAgoraId;
   int? _remoteUserAgoraId;
@@ -27,22 +27,23 @@ class VideoCallData extends ChangeNotifier {
     required VoidCallback onAnyUserLeavesChannel,
   }) async {
     // initialize rtc engine
-    _rtcEngine =
-        await RtcEngine.createWithContext(RtcEngineContext(_agoraConfig.appId));
+    _engine = createAgoraRtcEngine();
+
+    await _engine.initialize(
+      RtcEngineContext(
+        appId: AgoraConfig().appId,
+        channelProfile: ChannelProfileType.channelProfileCommunication1v1,
+      ),
+    );
 
     _initializeEventListeners(onAnyUserLeavesChannel);
 
-    await _rtcEngine.enableVideo();
-    await _rtcEngine.startPreview();
-    await _rtcEngine.setChannelProfile(ChannelProfile.Communication);
-    await _rtcEngine.setEnableSpeakerphone(true);
-    await _rtcEngine.adjustPlaybackSignalVolume(100);
-    await _rtcEngine.setInEarMonitoringVolume(100);
-    await _rtcEngine.setAudioProfile(
-      AudioProfile.SpeechStandard,
-      AudioScenario.Default,
-    );
-    await _rtcEngine.setVideoEncoderConfiguration(
+    await _engine.enableVideo();
+    await _engine.startPreview();
+    await _engine.setEnableSpeakerphone(true);
+    await _engine.adjustPlaybackSignalVolume(100);
+    await _engine.setInEarMonitoringVolume(100);
+    await _engine.setVideoEncoderConfiguration(
       VideoEncoderConfiguration(
         dimensions: VideoDimensions(
           height: MediaQuery.of(context).size.height.toInt(),
@@ -57,95 +58,177 @@ class VideoCallData extends ChangeNotifier {
     required String rtcToken,
     required String uid,
   }) async {
-    await _rtcEngine.joinChannelWithUserAccount(
-      rtcToken,
-      roomId,
-      uid,
+    await _engine.joinChannelWithUserAccount(
+      token: rtcToken,
+      channelId: roomId,
+      userAccount: uid,
     );
   }
 
   leaveChannel() async {
-    await _rtcEngine.leaveChannel();
+    await _engine.leaveChannel();
   }
 
-  _onLeavingChannel(VoidCallback onAnyUserLeavesChannel) {
+  _onLeavingChannel({VoidCallback? onAnyUserLeavesChannel}) {
     _remoteUserAgoraId = null;
-    onAnyUserLeavesChannel();
+    if (onAnyUserLeavesChannel != null) {
+      onAnyUserLeavesChannel();
+    }
   }
 
-  _initializeEventListeners(VoidCallback onAnyUserLeavesChannel) {
-    _rtcEngine.setEventHandler(
-      RtcEngineEventHandler(
-        joinChannelSuccess: _localUserJoinedHandler,
-        userJoined: _remoteUserJoinedHandler,
-        remoteVideoStats: _remoteVideoStatsHandler,
-        userOffline: (int uid, UserOfflineReason reason) async {
-          _onLeavingChannel(onAnyUserLeavesChannel);
+  RtcEngineEventHandler get _engineEventHandler => RtcEngineEventHandler(
+        onJoinChannelSuccess: _localUserJoinedHandler,
+        onUserJoined: _remoteUserJoinedHandler,
+        onRemoteVideoStats: _remoteVideoStatsHandler,
+        onUserOffline: (RtcConnection connection, int uid,
+            UserOfflineReasonType reason) async {
+          _onLeavingChannel();
 
           // even local user should leave this channel
           await leaveChannel();
         },
         // leaveChannel: _localUserLeaveHandler,
-        rejoinChannelSuccess: (String str, int a, int b) {},
-        remoteAudioStateChanged: _onRemoteAudioChanged,
-        remoteVideoStateChanged: _onRemoteVideoChanged,
-        localVideoStateChanged: _onLocalVideoStateChanged,
-        leaveChannel: (_) async =>
-            await _onLeavingChannel(onAnyUserLeavesChannel),
-      ),
-    );
+        onRejoinChannelSuccess: (RtcConnection str, int a) {},
+        onRemoteAudioStateChanged: _onRemoteAudioChanged,
+        onRemoteVideoStateChanged: _onRemoteVideoChanged,
+        onLocalVideoStateChanged: _onLocalVideoStateChanged,
+        onLeaveChannel: (RtcConnection connection, RtcStats rtcStats) async =>
+            await _onLeavingChannel(),
+      );
+
+  _initializeEventListeners(VoidCallback onAnyUserLeavesChannel) {
+    _engine.registerEventHandler(_engineEventHandler);
   }
 
-  _localUserJoinedHandler(uid, _, __) async {
-    _localUserAgoraId = uid;
+  _localUserJoinedHandler(RtcConnection connection, int _) async {
+    _localUserAgoraId = connection.localUid;
     notifyListeners();
   }
 
-  _remoteUserJoinedHandler(uid, _) async {
+  _remoteUserJoinedHandler(
+    RtcConnection connection,
+    int remoteUid,
+    int elapsed,
+  ) async {
     // Utils.successSnackbar('remote user with uid : $uid');
-    _remoteUserAgoraId = uid;
+    _remoteUserAgoraId = remoteUid;
     notifyListeners();
   }
 
-  _remoteVideoStatsHandler(RemoteVideoStats stats) {}
-  _onRemoteAudioChanged(uid, audioState, reason, elapsed) {
+  _remoteVideoStatsHandler(RtcConnection connection, RemoteVideoStats stats) {}
+
+  _onRemoteAudioChanged(
+    RtcConnection connection,
+    int remoteUid,
+    RemoteAudioState state,
+    RemoteAudioStateReason reason,
+    int elapsed,
+  ) {
     switch (reason) {
-      case AudioRemoteStateReason.RemoteMuted:
-        // _muteRemoteAudio();
+      case RemoteAudioStateReason.remoteAudioReasonInternal:
+        // TODO: Handle this case.
         break;
-      case AudioRemoteStateReason.RemoteUnmuted:
-        // _unmuteRemoteAudio();
+      case RemoteAudioStateReason.remoteAudioReasonNetworkCongestion:
+        // TODO: Handle this case.
+        break;
+      case RemoteAudioStateReason.remoteAudioReasonNetworkRecovery:
+        // TODO: Handle this case.
+        break;
+      case RemoteAudioStateReason.remoteAudioReasonLocalMuted:
+        // TODO: Handle this case.
+        break;
+      case RemoteAudioStateReason.remoteAudioReasonLocalUnmuted:
+        // TODO: Handle this case.
+        break;
+      case RemoteAudioStateReason.remoteAudioReasonRemoteMuted:
+        // TODO: Handle this case.
+        break;
+      case RemoteAudioStateReason.remoteAudioReasonRemoteUnmuted:
+        // TODO: Handle this case.
+        break;
+      case RemoteAudioStateReason.remoteAudioReasonRemoteOffline:
+        // TODO: Handle this case.
         break;
     }
   }
 
-  _onRemoteVideoChanged(uid, audioState, reason, elapsed) {
+  _onRemoteVideoChanged(
+    RtcConnection connection,
+    int remoteUid,
+    RemoteVideoState state,
+    RemoteVideoStateReason reason,
+    int elapsed,
+  ) {
     switch (reason) {
-      case AudioRemoteStateReason.RemoteMuted:
-        // _muteRemoteAudio();
+      case RemoteVideoStateReason.remoteVideoStateReasonInternal:
+        // TODO: Handle this case.
         break;
-      case AudioRemoteStateReason.RemoteUnmuted:
-        // _unmuteRemoteAudio();
+      case RemoteVideoStateReason.remoteVideoStateReasonNetworkCongestion:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonNetworkRecovery:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonLocalMuted:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonLocalUnmuted:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonRemoteMuted:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonRemoteUnmuted:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonRemoteOffline:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonAudioFallback:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonAudioFallbackRecovery:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason
+          .remoteVideoStateReasonVideoStreamTypeChangeToLow:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason
+          .remoteVideoStateReasonVideoStreamTypeChangeToHigh:
+        // TODO: Handle this case.
+        break;
+      case RemoteVideoStateReason.remoteVideoStateReasonSdkInBackground:
+        // TODO: Handle this case.
         break;
     }
   }
 
-  _onLocalVideoStateChanged(LocalVideoStreamState videoState, _) {
+  _onLocalVideoStateChanged(
+      VideoSourceType videoSourceType,
+      LocalVideoStreamState videoState,
+      LocalVideoStreamError videoStreamError) {
     switch (videoState) {
-      case LocalVideoStreamState.Stopped:
+      case LocalVideoStreamState.localVideoStreamStateStopped:
+        // TODO: Handle this case.
         break;
-      case LocalVideoStreamState.Capturing:
+      case LocalVideoStreamState.localVideoStreamStateCapturing:
+        // TODO: Handle this case.
         break;
-      case LocalVideoStreamState.Encoding:
+      case LocalVideoStreamState.localVideoStreamStateEncoding:
+        // TODO: Handle this case.
         break;
-      case LocalVideoStreamState.Failed:
+      case LocalVideoStreamState.localVideoStreamStateFailed:
+        // TODO: Handle this case.
         break;
     }
   }
 
   reset() async {
-    await _rtcEngine.leaveChannel();
-    await _rtcEngine.destroy();
+    _engine.unregisterEventHandler(_engineEventHandler);
+    await _engine.leaveChannel();
+    await _engine.release();
+
     _remoteUserAgoraId = null;
     _localUserAgoraId = null;
     _couldNotFindUsersToChat = false;
