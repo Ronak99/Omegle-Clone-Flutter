@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:omegle_clone/states/auth_data.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/room/chat_room_data.dart';
-import 'package:omegle_clone/states/room/room_data.dart';
-import 'package:omegle_clone/states/room/video_room_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
-import 'package:omegle_clone/ui/screens/auth/phone_auth_screen.dart';
-import 'package:omegle_clone/ui/screens/call/call_screen.dart';
-import 'package:omegle_clone/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _userData = Provider.of<UserData>(context, listen: false);
     _engagementData = Provider.of<EngagementData>(context, listen: false);
 
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _userData.initialize();
       Future.delayed(Duration(seconds: 2), () {
         _engagementData.initialize(_userData.getUser!.uid);
@@ -40,62 +36,80 @@ class _HomeScreenState extends State<HomeScreen> {
     UserData _userData = Provider.of<UserData>(context);
     ChatRoomData _chatRoomData = Provider.of<ChatRoomData>(context);
 
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        child: _userData.getUser == null
-            ? Center(child: Text("User was null"))
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(_userData.getUser!.uid),
-                  if (_chatRoomData.isSearching)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (_chatRoomData.shouldShowStopButton)
-                          TextButton(
-                            child: Text('Stop'),
-                            onPressed: () {
-                              Provider.of<ChatRoomData>(context, listen: false)
-                                  .stopSearchingUser();
-                            },
-                          ),
-                        CircularProgressIndicator(),
-                      ],
-                    )
-                  else
-                    TextButton(
-                      child: Text('Search Chat'),
-                      onPressed: () {
-                        Provider.of<ChatRoomData>(context, listen: false)
-                            .searchRandomUser(
-                          currentUserId: _userData.getUser!.uid,
-                          isEngagementNull: _engagementData.engagement == null,
-                        );
-                      },
-                    ),
-                  if (!_userData.getUser!.isAuthenticated)
-                    TextButton(
-                      child: Text('Find Video Chat'),
-                      onPressed: () => Utils.navigateTo(PhoneAuthScreen()),
-                    ),
-                  if (_userData.getUser!.isAuthenticated)
-                    TextButton(
-                      child: Text('Find Video Chat'),
-                      onPressed: () {
-                        Utils.navigateTo(CallScreen());
-                      },
-                    ),
-                  if (_userData.getUser!.isAuthenticated)
-                    TextButton(
-                      child: Text('Logout'),
-                      onPressed: () =>
-                          Provider.of<AuthData>(context, listen: false)
-                              .signOut(),
-                    ),
-                ],
+    double _floatingButtonSize = 85;
+    double _actionIconSize = _floatingButtonSize - 40;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: Container(
+          height: _floatingButtonSize,
+          width: _floatingButtonSize,
+          decoration: BoxDecoration(
+            color: Color(0xff414141),
+            shape: BoxShape.circle,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(_floatingButtonSize * .5),
+            child: PageView(
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  height: _floatingButtonSize,
+                  width: _floatingButtonSize,
+                  child: SvgPicture.asset(
+                    'images/search_text_chat.svg',
+                    height: _actionIconSize,
+                    width: _actionIconSize,
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  height: _floatingButtonSize,
+                  width: _floatingButtonSize,
+                  child: SvgPicture.asset(
+                    'images/search_text_chat.svg',
+                    height: _actionIconSize,
+                    width: _actionIconSize,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        body: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 25),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Welcome!',
+                style: TextStyle(
+                  color: Color(0xff414141),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 35,
+                ),
               ),
+              SizedBox(height: 12),
+              Text(
+                'Search and chat with anyone in the world',
+                style: TextStyle(
+                  color: Color(0xff595959),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 25,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
