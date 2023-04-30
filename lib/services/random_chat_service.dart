@@ -21,7 +21,7 @@ class RandomChatService {
     }
   }
 
-  Future<String> searchUserToChat({
+  Future<void> searchUserToChat({
     required String uid,
     required VoidCallback onConnectingUsers,
   }) async {
@@ -45,15 +45,6 @@ class RandomChatService {
         _checkIfShouldKeepGoing();
 
         await Future.delayed(Duration(seconds: 3));
-        Engagement _selfEngagement =
-            await _engagementService.queryEngagementRecord(uid: uid);
-
-        // Don't do anything if I have been marked busy by someone else
-        if (_selfEngagement.isBusy) {
-          // Return the room id with which I have been marked busy
-          return _selfEngagement.roomId!;
-        }
-
         _listOfPotentialUsers = await _engagementService.queryPotentialUsers(
           idToExclude: uid,
           engagementType: _engagementType,
@@ -73,38 +64,26 @@ class RandomChatService {
       String _pickedUserId =
           Utils.pickRandomValueFromList(_listOfPotentialUsers);
 
-      // Generate a room id
-      String _roomId = Utils.generateRandomId();
-
       // Check if the pickedUser has been marked busy
       // If they are marked busy, then query their room id, and store it in a data set
       Engagement _pickedUserEngagement =
           await _engagementService.queryEngagementRecord(uid: _pickedUserId);
 
       if (_pickedUserEngagement.isBusy) {
-        if (_pickedUserEngagement.connectedWith == uid) {
-          return _pickedUserEngagement.roomId!;
-        } else {
-          // If the user was already busy, find another user
-          // Keep finding another user until the list of potential users are empty
-          return searchUserToChat(
+        if (_pickedUserEngagement.connectedWith != uid) {
+           await searchUserToChat(
             uid: uid,
             onConnectingUsers: onConnectingUsers,
           );
+
+          return;
         }
       }
 
       if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
-        // We started the search first, so we will assume command
-        onConnectingUsers();
 
-        // If they are not marked busy, then mark them busy, with chat room
-        // mark both the users busy
-        _engagementService.connectChatUsers(
-          uid: uid,
-          roomId: _roomId,
-          connectedWith: _pickedUserId,
-        );
+        // Generate a room id
+        String _roomId = Utils.generateRandomId();
 
         ChatRoom _chatRoom = ChatRoom(
           creatorId: uid,
@@ -117,14 +96,20 @@ class RandomChatService {
         // if user is un-authenticated
         // create chat room
         await createChatRoom(chatRoom: _chatRoom);
+
+
+        // If they are not marked busy, then mark them busy, with chat room
+        // mark both the users busy
+        await _engagementService.connectChatUsers(
+          uid: uid,
+          roomId: _roomId,
+          connectedWith: _pickedUserId,
+        );
+
+        // We started the search first, so we will assume command
+        onConnectingUsers();
+        return;
       }
-
-      return _roomId;
-
-      // if user is authenticated
-      // check if the picked user is a friend
-      // if they are, make them join the same room
-      // else create chat room
     } on CustomException catch (e) {
       rethrow;
     }
@@ -172,7 +157,7 @@ class RandomChatService {
       _checkIfShouldKeepGoing();
 
       if (_listOfPotentialUsers.isEmpty) {
-        throw CustomException("No active users found");
+        throw CustomException("No active users found", code: 'no_user_found');
       }
 
       // pick a user at random
