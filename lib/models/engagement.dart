@@ -7,14 +7,12 @@ class Engagement {
   String uid;
   EngagementStatus engagementStatus;
   String? roomId;
-  String? roomToken;
   int? searchStartedOn;
   String? connectedWith;
   EngagegmentType? engagegmentType;
   Engagement({
     required this.uid,
     this.roomId,
-    this.roomToken,
     this.connectedWith,
     required this.engagementStatus,
     this.searchStartedOn,
@@ -25,7 +23,6 @@ class Engagement {
     return {
       'uid': uid,
       'room_id': roomId,
-      'room_token': roomToken,
       'status': engagementStatus.toRawValue,
       'search_started_on': searchStartedOn,
       'connected_with': connectedWith,
@@ -40,7 +37,6 @@ class Engagement {
     return Engagement(
       uid: map['uid'],
       roomId: map['room_id'],
-      roomToken: map['room_token'],
       engagementStatus: _engagementStatus.toEngagementStatus,
       searchStartedOn: map['search_started_on'],
       connectedWith: map['connected_with'],
