@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/states/back_button_data.dart';
 import 'package:omegle_clone/states/room/chat_room_data.dart';
@@ -47,14 +49,16 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     _chatData = Provider.of<ChatRoomData>(context);
 
+    log("Chat room is null: ${_chatData.chatRoom == null}", name: "ChatScreen");
+
     return WillPopScope(
       onWillPop: () async {
-        if (_chatData.chatRoom == null) {
-          return false;
-        }
-        if (!_chatData.chatRoom!.isEngaged) {
-          return true;
-        }
+        // if (_chatData.chatRoom == null) {
+        //   return false;
+        // }
+        // if (!_chatData.chatRoom!.isEngaged) {
+        //   return true;
+        // }
         return await _backButtonData.showGoBack(
           () => _chatData.closeRoomAndReset(
             _engagementData.engagement!.uid,
@@ -102,7 +106,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           itemBuilder: (context, i) {
                             return ChatBubble(
                               message: _chatData.getMessages![i],
-                              currentUserId: _userData.getUser!.uid,
+                              currentUserId: _userData.getUser.uid,
                             );
                           },
                         );
@@ -120,7 +124,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               child: Text("Search another chat"),
                               onPressed: () {
                                 _chatData.searchRandomUser(
-                                  currentUserId: _userData.getUser!.uid,
+                                  currentUserId: _userData.getUser.uid,
                                   isEngagementNull: false,
                                 );
                                 _chatData.deleteRoom();
@@ -159,7 +163,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               color: Colors.blue,
                             ),
                             onPressed: () => _chatData.onSendMessageButtonTap(
-                              uid: _userData.getUser!.uid,
+                              uid: _userData.getUser.uid,
                               roomId: _engagementData.engagement!.roomId!,
                             ),
                           ),

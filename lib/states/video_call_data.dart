@@ -1,26 +1,23 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:omegle_clone/api/agora_api.dart';
 import 'package:omegle_clone/constants/agora_config.dart';
+import 'package:omegle_clone/states/room/video_room_data.dart';
+import 'package:omegle_clone/states/user_data.dart';
+import 'package:one_context/one_context.dart';
+import 'package:provider/provider.dart';
 
 class VideoCallData extends ChangeNotifier {
-  final AgoraConfig _agoraConfig = AgoraConfig();
+  // final AgoraConfig _agoraConfig = AgoraConfig();
 
-  late RtcEngine _engine;
-  RtcEngine get getAgoraEngine => _engine;
+  RtcEngine? _engine;
+  RtcEngine? get getAgoraEngine => _engine;
 
-  dynamic _localUserAgoraId;
+  int? _localUserAgoraId;
   int? _remoteUserAgoraId;
 
-  dynamic get localUserAgoraId => _localUserAgoraId;
+  int? get localUserAgoraId => _localUserAgoraId;
   int? get remoteUserAgoraId => _remoteUserAgoraId;
-
-  bool _couldNotFindUsersToChat = false;
-  bool get couldNotFindUsersToChat => _couldNotFindUsersToChat;
-
-  displayNoUsersFoundUI() {
-    _couldNotFindUsersToChat = true;
-    notifyListeners();
-  }
 
   initialize(
     context, {
@@ -29,21 +26,20 @@ class VideoCallData extends ChangeNotifier {
     // initialize rtc engine
     _engine = createAgoraRtcEngine();
 
-    await _engine.initialize(
+    await _engine!.initialize(
       RtcEngineContext(
-        appId: AgoraConfig().appId,
-        channelProfile: ChannelProfileType.channelProfileCommunication1v1,
+        appId: AgoraConfig.appId,
+        channelProfile: ChannelProfileType.channelProfileCommunication,
       ),
     );
 
     _initializeEventListeners(onAnyUserLeavesChannel);
 
-    await _engine.enableVideo();
-    await _engine.startPreview();
-    await _engine.setEnableSpeakerphone(true);
-    await _engine.adjustPlaybackSignalVolume(100);
-    await _engine.setInEarMonitoringVolume(100);
-    await _engine.setVideoEncoderConfiguration(
+    await _engine!.enableVideo();
+    await _engine!.startPreview();
+    await _engine!.adjustPlaybackSignalVolume(100);
+    await _engine!.setInEarMonitoringVolume(100);
+    await _engine!.setVideoEncoderConfiguration(
       VideoEncoderConfiguration(
         dimensions: VideoDimensions(
           height: MediaQuery.of(context).size.height.toInt(),
@@ -58,22 +54,33 @@ class VideoCallData extends ChangeNotifier {
     required String rtcToken,
     required String uid,
   }) async {
-    await _engine.joinChannelWithUserAccount(
-      token: rtcToken,
+    String _token =
+        await AgoraApi().getRtcRoomToken(uid: uid, channelName: roomId);
+
+    await _engine?.joinChannelWithUserAccount(
+      token: _token,
       channelId: roomId,
       userAccount: uid,
     );
   }
 
   leaveChannel() async {
-    await _engine.leaveChannel();
+    await _engine?.leaveChannel();
   }
 
-  _onLeavingChannel({VoidCallback? onAnyUserLeavesChannel}) {
+  _onLeavingChannel() {
     _remoteUserAgoraId = null;
-    if (onAnyUserLeavesChannel != null) {
-      onAnyUserLeavesChannel();
-    }
+
+    BuildContext context = OneContext.instance.context!;
+
+    VideoRoomData _videoRoomData = Provider.of<VideoRoomData>(context, listen: false);
+    UserData _userData = Provider.of<UserData>(context, listen: false);
+
+    // close the current room
+    _videoRoomData.closeRoom(uid: _userData.getUser.uid);
+
+    // Search for a random user
+    _videoRoomData.searchAndJoinChannel();
   }
 
   RtcEngineEventHandler get _engineEventHandler => RtcEngineEventHandler(
@@ -97,7 +104,7 @@ class VideoCallData extends ChangeNotifier {
       );
 
   _initializeEventListeners(VoidCallback onAnyUserLeavesChannel) {
-    _engine.registerEventHandler(_engineEventHandler);
+    _engine?.registerEventHandler(_engineEventHandler);
   }
 
   _localUserJoinedHandler(RtcConnection connection, int _) async {
@@ -225,12 +232,11 @@ class VideoCallData extends ChangeNotifier {
   }
 
   reset() async {
-    _engine.unregisterEventHandler(_engineEventHandler);
-    await _engine.leaveChannel();
-    await _engine.release();
+    _engine?.unregisterEventHandler(_engineEventHandler);
+    await _engine?.leaveChannel();
+    await _engine?.release();
 
     _remoteUserAgoraId = null;
     _localUserAgoraId = null;
-    _couldNotFindUsersToChat = false;
   }
 }

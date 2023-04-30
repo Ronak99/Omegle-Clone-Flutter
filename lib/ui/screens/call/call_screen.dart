@@ -1,13 +1,13 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:omegle_clone/states/back_button_data.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/room/video_room_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/states/video_call_data.dart';
-import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
-import 'package:provider/provider.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key}) : super(key: key);
@@ -29,15 +29,9 @@ class _CallScreenState extends State<CallScreen> {
     _userData = Provider.of<UserData>(context, listen: false);
 
     // Initialize the agora engine
-    _videoCallData.initialize(context, onAnyUserLeavesChannel: () {
-      // close the current room
-      _videoRoomData.closeRoom(uid: _userData.getUser!.uid);
+    _videoCallData.initialize(context, onAnyUserLeavesChannel: () {});
 
-      // Search for a random user
-      _searchAndJoinChannel();
-    });
-
-    _searchAndJoinChannel();
+    _videoRoomData.searchAndJoinChannel();
   }
 
   @override
@@ -46,45 +40,13 @@ class _CallScreenState extends State<CallScreen> {
     _videoCallData.reset();
   }
 
-  _searchAndJoinChannel() async {
-    try {
-      final _engagementData =
-          Provider.of<EngagementData>(context, listen: false);
-
-      await _videoRoomData.searchRandomUser(
-        currentUserId: _userData.getUser!.uid,
-        isEngagementNull: _engagementData.engagement == null,
-        onUserFound: () {},
-      );
-
-      await Future.delayed(Duration(seconds: 3));
-
-      _videoRoomData.initializeChatRoom(
-        roomId: _engagementData.engagement!.roomId!,
-      );
-
-      _videoCallData.joinChannel(
-        roomId: _engagementData.engagement!.roomId!,
-        rtcToken: _engagementData.engagement!.roomToken!,
-        uid: _userData.getUser!.uid,
-      );
-    } on CustomException {
-      _videoCallData.displayNoUsersFoundUI();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     EngagementData _engagementData = Provider.of<EngagementData>(context);
     _videoCallData = Provider.of<VideoCallData>(context);
+    _videoRoomData = Provider.of<VideoRoomData>(context);
 
     final BackButtonData _backButtonData = BackButtonData();
-
-    if (_videoCallData.couldNotFindUsersToChat) {
-      return Center(
-        child: Text("Could not find users to chat, try again after sometime"),
-      );
-    }
 
     return WillPopScope(
       onWillPop: () async {
@@ -110,59 +72,134 @@ class _CallScreenState extends State<CallScreen> {
             Column(
               children: [
                 Expanded(
-                  child: (_engagementData.engagement?.roomId != null &&
-                          _videoCallData.remoteUserAgoraId != null)
-                      ? AgoraVideoView(
-                          controller: VideoViewController.remote(
-                            rtcEngine: _videoCallData.getAgoraEngine,
-                            canvas: VideoCanvas(
-                                uid: _videoCallData.remoteUserAgoraId!),
-                            connection: RtcConnection(
-                              channelId: _engagementData.engagement!.roomId!,
+                  child: Builder(
+                    builder: (contetx) {
+                      if (_videoRoomData.couldNotFindUsersToChat) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Could not find users to chat!"),
+                            SizedBox(height: 8),
+                            SecondaryActionButton(
+                              text: "Search!",
+                              onPressed: () {
+                                VideoRoomData _videoRoomData =
+                                    Provider.of<VideoRoomData>(context,
+                                        listen: false);
+                                UserData _userData = Provider.of<UserData>(
+                                    context,
+                                    listen: false);
+
+                                // close the current room
+                                _videoRoomData.closeRoom(
+                                    uid: _userData.getUser.uid);
+
+                                // Search for a random user
+                                _videoRoomData.searchAndJoinChannel();
+                              },
                             ),
+                          ],
+                        );
+                      }
+
+                      if ((_engagementData.engagement?.roomId != null &&
+                          _videoCallData.remoteUserAgoraId != null)) {
+                        return Container(
+                          color: Colors.blue,
+                          child: Builder(
+                            builder: (context) {
+                              return AgoraVideoView(
+                                controller: VideoViewController.remote(
+                                  rtcEngine: _videoCallData.getAgoraEngine!,
+                                  canvas: VideoCanvas(
+                                    uid: _videoCallData.remoteUserAgoraId,
+                                  ),
+                                  connection: RtcConnection(
+                                    channelId:
+                                        _engagementData.engagement!.roomId,
+                                  ),
+                                  useAndroidSurfaceView: true,
+                                ),
+                              );
+                            },
                           ),
-                        )
-                      : Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      return Center(child: CircularProgressIndicator());
+                    },
+                  ),
                 ),
                 Expanded(
-                  child: _videoCallData.localUserAgoraId == null
-                      ? Center(child: CircularProgressIndicator())
-                      : AgoraVideoView(
+                  child: Container(
+                    color: Colors.red,
+                    child: Stack(
+                      children: [
+                        AgoraVideoView(
                           controller: VideoViewController(
-                            rtcEngine: _videoCallData.getAgoraEngine,
+                            rtcEngine: _videoCallData.getAgoraEngine!,
                             canvas: VideoCanvas(
-                              uid: _videoCallData.localUserAgoraId,
+                              uid: 0,
                             ),
                           ),
+                          onAgoraVideoViewCreated: (viewId) {
+                            _videoCallData.getAgoraEngine?.startPreview();
+                          },
                         ),
+                        Center(
+                          child:
+                              Text(_videoCallData.localUserAgoraId.toString()),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
             if (_videoCallData.remoteUserAgoraId != null)
               Align(
                 alignment: Alignment.bottomRight,
-                child: GestureDetector(
-                  onTap: () {
+                child: SecondaryActionButton(
+                  text: "Next",
+                  onPressed: () {
                     _videoCallData.leaveChannel();
                   },
-                  child: Container(
-                    margin: EdgeInsets.only(right: 25, bottom: 25),
-                    decoration: BoxDecoration(
-                      color: Colors.amber,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                    child: Text(
-                      "Next",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class SecondaryActionButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+
+  const SecondaryActionButton({
+    Key? key,
+    required this.text,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        margin: EdgeInsets.only(right: 25, bottom: 25),
+        decoration: BoxDecoration(
+          color: Colors.amber,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
         ),
       ),
     );

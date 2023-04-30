@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:omegle_clone/enums/engagement_status.dart';
 import 'package:omegle_clone/models/engagement.dart';
 import 'package:omegle_clone/services/engagement_service.dart';
+import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
+import 'package:omegle_clone/utils/utils.dart';
 
 class EngagementData extends ChangeNotifier {
   final EngagementService _engagementService = EngagementService();
@@ -18,7 +20,13 @@ class EngagementData extends ChangeNotifier {
         .userEngagementStream(uid: uid)
         .listen((engagementDoc) {
       if (engagementDoc.data() != null) {
-        _engagement = engagementDoc.data()!;
+        _engagement = engagementDoc.data();
+
+        if(_engagement == null) return;
+
+        if(_engagement!.isForChat && _engagement!.isBusy && _engagement!.roomId != null){
+          Utils.navigateTo(ChatScreen(roomId: _engagement!.roomId!));
+        }
         notifyListeners();
       }
     });

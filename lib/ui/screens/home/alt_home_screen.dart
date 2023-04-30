@@ -27,10 +27,10 @@ class _AltHomeScreenState extends State<AltHomeScreen> {
     _userData = Provider.of<UserData>(context, listen: false);
     _engagementData = Provider.of<EngagementData>(context, listen: false);
 
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _userData.initialize();
       Future.delayed(Duration(seconds: 2), () {
-        _engagementData.initialize(_userData.getUser!.uid);
+        _engagementData.initialize(_userData.getUser.uid);
       });
     });
   }
@@ -41,14 +41,14 @@ class _AltHomeScreenState extends State<AltHomeScreen> {
     ChatRoomData _chatRoomData = Provider.of<ChatRoomData>(context);
 
     return Scaffold(
-      body: Container(
+      body: SizedBox(
         width: double.infinity,
         child: _userData.getUser == null
             ? Center(child: Text("User was null"))
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(_userData.getUser!.uid),
+                  Text(_userData.getUser.uid),
                   if (_chatRoomData.isSearching)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -70,24 +70,24 @@ class _AltHomeScreenState extends State<AltHomeScreen> {
                       onPressed: () {
                         Provider.of<ChatRoomData>(context, listen: false)
                             .searchRandomUser(
-                          currentUserId: _userData.getUser!.uid,
+                          currentUserId: _userData.getUser.uid,
                           isEngagementNull: _engagementData.engagement == null,
                         );
                       },
                     ),
-                  if (!_userData.getUser!.isAuthenticated)
+                  if (!_userData.getUser.isAuthenticated)
                     TextButton(
                       child: Text('Find Video Chat'),
                       onPressed: () => Utils.navigateTo(PhoneAuthScreen()),
                     ),
-                  if (_userData.getUser!.isAuthenticated)
+                  if (_userData.getUser.isAuthenticated)
                     TextButton(
                       child: Text('Find Video Chat'),
                       onPressed: () {
                         Utils.navigateTo(CallScreen());
                       },
                     ),
-                  if (_userData.getUser!.isAuthenticated)
+                  if (_userData.getUser.isAuthenticated)
                     TextButton(
                       child: Text('Logout'),
                       onPressed: () =>

@@ -69,7 +69,7 @@ class EngagementService {
     }
   }
 
-  connectChatUsers({
+  Future<void> connectChatUsers({
     required String uid,
     required String roomId,
     required String connectedWith,
@@ -98,22 +98,22 @@ class EngagementService {
     try {
       AgoraApi _agoraApi = AgoraApi();
 
-      String _localUserRoomToken =
-          await _agoraApi.getRtcRoomToken(uid: uid, channelName: roomId);
-      String _remoteUserRoomToken = await _agoraApi.getRtcRoomToken(
-          uid: connectedWith, channelName: roomId);
+      // String _localUserRoomToken =
+      //     await _agoraApi.getRtcRoomToken(uid: uid, channelName: roomId);
+      // String _remoteUserRoomToken = await _agoraApi.getRtcRoomToken(
+      //     uid: connectedWith, channelName: roomId);
 
       await FirestoreRefs.engagementCollection.doc(uid).update({
         'status': EngagementStatus.busy.toRawValue,
         'room_id': roomId,
         'connected_with': connectedWith,
-        'room_token': _localUserRoomToken,
+        // 'room_token': _localUserRoomToken,
       });
       await FirestoreRefs.engagementCollection.doc(connectedWith).update({
         'status': EngagementStatus.busy.toRawValue,
         'room_id': roomId,
         'connected_with': uid,
-        'room_token': _remoteUserRoomToken,
+        // 'room_token': _remoteUserRoomToken,
       });
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);

@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
-import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
@@ -42,14 +42,13 @@ class ChatRoomData extends RoomData {
         );
       }
 
-      String _roomId = await randomChatService.searchUserToChat(
+      await randomChatService.searchUserToChat(
         uid: currentUserId,
         onConnectingUsers: () {
           _shouldShowStopButton = false;
           notifyListeners();
         },
       );
-      Utils.navigateTo(ChatScreen(roomId: _roomId));
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
       engagementService.markUserFree(uid: currentUserId);
@@ -89,6 +88,9 @@ class ChatRoomData extends RoomData {
   }
 
   intializeMessageList({required String roomId}) {
+    if (_messageSubscription != null) {
+      _messageSubscription?.cancel();
+    }
     _messageSubscription =
         randomChatService.queryRoomChat(roomId: roomId).listen((messageQuery) {
       _messageList = messageQuery.docs.map((e) => e.data()).toList();
@@ -97,14 +99,20 @@ class ChatRoomData extends RoomData {
   }
 
   initializeChatRoom({required String roomId}) {
+    if (_chatRoomSubscription != null) {
+      _chatRoomSubscription?.cancel();
+    }
     _chatRoomSubscription = randomChatService
         .chatRoomStream(
       roomId: roomId,
       isVideoRoom: false,
     )
         .listen((chatRoomValue) {
+      log("Chat Room Stream Subscription: $roomId", name: "ChatRoomData");
+
       _chatRoom = chatRoomValue.data();
 
+      log("Is chat room null: ${_chatRoom == null}", name: "ChatRoomData");
       if (_chatRoom == null) return;
 
       if (!_chatRoom!.isEngaged) {

@@ -5,7 +5,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// Returns the current [User] if they are currently signed-in, or null if not.
-  User? getCurrentUser() => _auth.currentUser;
+  User? get getCurrentUser => _auth.currentUser;
 
   /// Notifies about changes to the user's sign-in state (such as sign-in or sign-out).
   Stream<User?> authChanges() => _auth.authStateChanges();

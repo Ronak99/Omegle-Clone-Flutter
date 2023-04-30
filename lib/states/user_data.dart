@@ -5,11 +5,11 @@ import 'package:omegle_clone/services/auth_service.dart';
 class UserData extends ChangeNotifier {
   final AuthService _authService = AuthService();
 
-  UnAuthenticatedUser? _unAuthenticatedUser;
+  UnAuthenticatedUser _unAuthenticatedUser = UnAuthenticatedUser();
   UnAuthenticatedUser? get unAuthenticatedUser => _unAuthenticatedUser;
   AuthenticatedUser? _authenticatedUser;
 
-  BaseUser? get getUser => _authenticatedUser ?? _unAuthenticatedUser;
+  BaseUser get getUser => _authenticatedUser ?? _unAuthenticatedUser;
 
   initialize() {
     _authService.authChanges().listen((user) {

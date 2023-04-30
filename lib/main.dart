@@ -8,10 +8,9 @@ import 'package:omegle_clone/states/room/video_room_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/states/video_call_data.dart';
 import 'package:omegle_clone/ui/screens/home/home_screen.dart';
+import 'package:omegle_clone/utils/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:one_context/one_context.dart';
-
-import 'ui/screens/chat/chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +36,14 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         builder: OneContext().builder,
         navigatorKey: OneContext().key,
-        home: HomeScreen(),
+        home: Scaffold(
+          body: Center(
+            child: TextButton(
+              child: Text('Go'),
+              onPressed: () => Utils.navigateTo(HomeScreen()),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -3,14 +3,22 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:omegle_clone/models/chat_room.dart';
-import 'package:omegle_clone/ui/screens/call/call_screen.dart';
+import 'package:omegle_clone/states/engagement_data.dart';
+import 'package:omegle_clone/states/user_data.dart';
+import 'package:omegle_clone/states/video_call_data.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
+import 'package:one_context/one_context.dart';
+import 'package:provider/provider.dart';
 
 import 'room_data.dart';
 
 class VideoRoomData extends RoomData {
   ChatRoom? _chatRoom;
+
+  bool _couldNotFindUsersToChat = false;
+  bool get couldNotFindUsersToChat => _couldNotFindUsersToChat;
+
   ChatRoom? get chatRoom => _chatRoom;
 
   StreamSubscription<DocumentSnapshot<ChatRoom>>? _chatRoomSubscription;
@@ -21,6 +29,8 @@ class VideoRoomData extends RoomData {
     required VoidCallback onUserFound,
   }) async {
     try {
+      hideNoUsersFoundUI();
+
       if (isEngagementNull) {
         // if engagement has not yet been set
         await engagementService.createInitialEngagementRecord(
@@ -28,15 +38,28 @@ class VideoRoomData extends RoomData {
         );
       }
 
-      String _roomId =
-          await randomChatService.searchUserToVideoChat(uid: currentUserId);
+      await randomChatService.searchUserToVideoChat(uid: currentUserId);
 
       onUserFound();
     } on CustomException catch (e) {
+      if (e.code == 'no_user_found') {
+        displayNoUsersFoundUI();
+      }
+
       Utils.errorSnackbar(e.message);
       engagementService.markUserFree(uid: currentUserId);
       rethrow;
     }
+  }
+
+  displayNoUsersFoundUI() {
+    _couldNotFindUsersToChat = true;
+    notifyListeners();
+  }
+
+  hideNoUsersFoundUI() {
+    _couldNotFindUsersToChat = false;
+    notifyListeners();
   }
 
   initializeChatRoom({required String roomId}) {
@@ -50,7 +73,39 @@ class VideoRoomData extends RoomData {
     });
   }
 
+  searchAndJoinChannel() async {
+    try {
+      BuildContext context = OneContext.instance.context!;
+
+      final _engagementData =
+          Provider.of<EngagementData>(context, listen: false);
+      final _videoCallData = Provider.of<VideoCallData>(context, listen: false);
+      final _userData = Provider.of<UserData>(context, listen: false);
+
+      await searchRandomUser(
+        currentUserId: _userData.getUser.uid,
+        isEngagementNull: _engagementData.engagement == null,
+        onUserFound: () {},
+      );
+
+      await Future.delayed(Duration(seconds: 3));
+
+      initializeChatRoom(
+        roomId: _engagementData.engagement!.roomId!,
+      );
+
+      _videoCallData.joinChannel(
+        roomId: _engagementData.engagement!.roomId!,
+        rtcToken: "",
+        uid: _userData.getUser.uid,
+      );
+    } on CustomException {
+      displayNoUsersFoundUI();
+    }
+  }
+
   closeRoom({required String uid}) async {
+    if (_chatRoom == null) return;
     try {
       await randomChatService.closeChatRoom(
         uid: uid,
