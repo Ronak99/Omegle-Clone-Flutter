@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:omegle_clone/states/auth_data.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/provider/auth_provider.dart';
 
-class PhoneAuthScreen extends StatelessWidget {
+class PhoneAuthScreen extends ConsumerWidget {
   const PhoneAuthScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    var authState = ref.watch(authProvider);
+    var authProviderRef = ref.watch(authProvider.notifier);
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -28,23 +31,17 @@ class PhoneAuthScreen extends StatelessWidget {
             Column(
               children: [
                 TextFormField(
-                  controller: Provider.of<AuthData>(context, listen: false)
-                      .phoneTextFieldController,
+                  controller: authProviderRef.phoneTextFieldController,
                   decoration: InputDecoration(
                     labelText: "Phone Number",
                     hintText: "+911234567890",
                   ),
                 ),
                 SizedBox(height: 10),
-                Consumer<AuthData>(
-                  builder: (context, authData, _) {
-                    return TextButton(
-                      child: authData.isBusy
-                          ? Text("Loading...")
-                          : Text("Send OTP"),
-                      onPressed: () => authData.onSendOtpButtonTap(),
-                    );
-                  },
+                TextButton(
+                  child:
+                      authState.isBusy ? Text("Loading...") : Text("Send OTP"),
+                  onPressed: () => authProviderRef.onSendOtpButtonTap(),
                 ),
               ],
             ),

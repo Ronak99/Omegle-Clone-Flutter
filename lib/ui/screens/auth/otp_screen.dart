@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:omegle_clone/states/auth_data.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/provider/auth_provider.dart';
 
-class OtpScreen extends StatelessWidget {
+class OtpScreen extends ConsumerWidget {
   const OtpScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    var authState = ref.watch(authProvider);
+    var authProviderRef = ref.watch(authProvider.notifier);
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -22,23 +25,18 @@ class OtpScreen extends StatelessWidget {
             Column(
               children: [
                 TextFormField(
-                  controller: Provider.of<AuthData>(context, listen: false)
-                      .otpFieldController,
+                  controller: authProviderRef.otpFieldController,
                   decoration: InputDecoration(
                     labelText: "Enter OTP",
                     hintText: "123456",
                   ),
                 ),
                 SizedBox(height: 10),
-                Consumer<AuthData>(
-                  builder: (context, authData, _) {
-                    return TextButton(
-                      child: authData.isBusy
-                          ? Text("Loading...")
-                          : Text("Verify OTP"),
-                      onPressed: () => authData.onVerifyOtpButtonTap(),
-                    );
-                  },
+                TextButton(
+                  child: authState.isBusy
+                      ? Text("Loading...")
+                      : Text("Verify OTP"),
+                  onPressed: () => authProviderRef.onVerifyOtpButtonTap(),
                 ),
               ],
             ),
