@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:omegle_clone/join_channel_video.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/room/chat_room_data.dart';
 import 'package:omegle_clone/states/room/video_room_data.dart';
