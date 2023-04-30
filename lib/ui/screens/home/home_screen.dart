@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:omegle_clone/join_channel_video.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
 import 'package:omegle_clone/states/room/chat_room_data.dart';
+import 'package:omegle_clone/states/room/video_room_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
+import 'package:omegle_clone/ui/screens/call/call_screen.dart';
+import 'package:omegle_clone/ui/screens/home/action_button.dart';
+import 'package:omegle_clone/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,30 +19,51 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // page controller
+  final PageController _pageController = PageController();
+
+  // local state
+  bool get isOnSearchChatPage => _pageController.page == 1;
+  bool get isOnSearchVideoPage => _pageController.page == 0;
+
+  // global state
   late UserData _userData;
   late EngagementData _engagementData;
+  late VideoRoomData _videoRoomData;
+  late ChatRoomData _chatRoomData;
 
   @override
   void initState() {
     super.initState();
     _userData = Provider.of<UserData>(context, listen: false);
     _engagementData = Provider.of<EngagementData>(context, listen: false);
+    _videoRoomData = Provider.of<VideoRoomData>(context, listen: false);
+    _chatRoomData = Provider.of<ChatRoomData>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _userData.initialize();
       Future.delayed(Duration(seconds: 2), () {
-        _engagementData.initialize(_userData.getUser!.uid);
+        _engagementData.initialize(_userData.getUser.uid);
       });
     });
   }
 
+  void _onActionButtonTap() {
+    if (isOnSearchChatPage) {
+      _chatRoomData.searchRandomUser(
+        currentUserId: _userData.getUser.uid,
+        isEngagementNull: _engagementData.engagement == null,
+      );
+    } else {
+      // Utils.navigateTo(JoinChannelVideo());
+      Utils.navigateTo(CallScreen());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    UserData _userData = Provider.of<UserData>(context);
-    ChatRoomData _chatRoomData = Provider.of<ChatRoomData>(context);
-
-    double _floatingButtonSize = 85;
-    double _actionIconSize = _floatingButtonSize - 40;
+    _videoRoomData = Provider.of<VideoRoomData>(context);
+    _chatRoomData = Provider.of<ChatRoomData>(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -47,65 +73,68 @@ class _HomeScreenState extends State<HomeScreen> {
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: Container(
-          height: _floatingButtonSize,
-          width: _floatingButtonSize,
-          decoration: BoxDecoration(
-            color: Color(0xff414141),
-            shape: BoxShape.circle,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(_floatingButtonSize * .5),
-            child: PageView(
-              children: [
-                Container(
-                  alignment: Alignment.center,
-                  height: _floatingButtonSize,
-                  width: _floatingButtonSize,
-                  child: SvgPicture.asset(
-                    'images/search_text_chat.svg',
-                    height: _actionIconSize,
-                    width: _actionIconSize,
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  height: _floatingButtonSize,
-                  width: _floatingButtonSize,
-                  child: SvgPicture.asset(
-                    'images/search_text_chat.svg',
-                    height: _actionIconSize,
-                    width: _actionIconSize,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
         body: Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 25),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'Welcome!',
-                style: TextStyle(
-                  color: Color(0xff414141),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 35,
-                ),
+          child: Stack(
+            children: [
+              PageView(
+                controller: _pageController,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset("images/welcome-light.svg"),
+                      Text(
+                        'Welcome!',
+                        style: TextStyle(
+                          color: Color(0xff414141),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 35,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Tap on the button to talk to randomly video chat with someone',
+                        style: TextStyle(
+                          color: Color(0xff595959),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 25,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset("images/welcome-light.svg"),
+                      Text(
+                        'Welcome!',
+                        style: TextStyle(
+                          color: Color(0xff414141),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 35,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Tap on the button to chat randomly with someone',
+                        style: TextStyle(
+                          color: Color(0xff595959),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 25,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              SizedBox(height: 12),
-              Text(
-                'Search and chat with anyone in the world',
-                style: TextStyle(
-                  color: Color(0xff595959),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 25,
-                ),
+              ActionButton(
+                controller: _pageController,
+                isBusy: _videoRoomData.isSearching || _chatRoomData.isSearching,
+                onPressed: _onActionButtonTap,
               ),
             ],
           ),
