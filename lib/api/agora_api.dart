@@ -9,7 +9,7 @@ class AgoraApi {
     required String channelName,
   }) async {
     String _cloudFunctionUrl =
-        'https://us-central1-avian-display-193502.cloudfunctions.net/getRTCToken?account=$uid&channelName=$channelName';
+        'https://us-central1-highlight-evolution.cloudfunctions.net/getRTCToken?account=$uid&channelName=$channelName';
 
     try {
       Map<String, dynamic> _dataMap = {
