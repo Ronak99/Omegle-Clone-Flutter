@@ -30,6 +30,13 @@ class Engagement {
     };
   }
 
+  factory Engagement.empty() {
+    return Engagement(
+      uid: '',
+      engagementStatus: EngagementStatus.free,
+    );
+  }
+
   factory Engagement.fromMap(Map<String, dynamic> map) {
     String _engagementStatus = map['status']!;
     String? _engagementType = map['type'];

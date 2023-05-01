@@ -1,55 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:omegle_clone/constants/numerics.dart';
 
-class ActionButton extends StatefulWidget {
-  final PageController controller;
+class ActionButton extends ConsumerWidget {
+  final double viewPage;
   final bool isBusy;
   final VoidCallback onPressed;
 
   const ActionButton({
     Key? key,
-    required this.controller,
+    required this.viewPage,
     required this.isBusy,
     required this.onPressed,
   }) : super(key: key);
 
-  @override
-  State<ActionButton> createState() => _ActionButtonState();
-}
-
-class _ActionButtonState extends State<ActionButton> {
-  double _xOffset = -.5;
-
   final double _minimumIconSize = .8;
   final double _minimumIconOpacity = .6;
 
-  double _activePage = 0;
+  // double _activePage = 0;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+  //     widget.controller.addListener(() {
+  //       if (!widget.controller.hasClients) return;
+
+  //       if (widget.controller.page != null) {
+  //         _activePage = widget.controller.page!;
+  //       }
+  //       // interpolates from .5 to 5
+  //       setState(() {});
+  //     });
+  //   });
+  // }
 
   @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    double _xOffset = viewPage - .5;
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      widget.controller.addListener(() {
-        if (!widget.controller.hasClients) return;
-
-        if (widget.controller.page != null) {
-          _activePage = widget.controller.page!;
-        }
-        // interpolates from .5 to 5
-        _xOffset = _activePage - .5;
-        setState(() {});
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: GestureDetector(
-        onTap: widget.onPressed,
+        onTap: onPressed,
         child: Container(
           width: double.infinity,
           height: floatingButtonSize,
@@ -59,7 +54,7 @@ class _ActionButtonState extends State<ActionButton> {
             children: [
               Center(
                 child: Container(
-                  decoration: widget.isBusy
+                  decoration: isBusy
                       ? null
                       : BoxDecoration(
                           border: Border.all(
@@ -68,7 +63,7 @@ class _ActionButtonState extends State<ActionButton> {
                           ),
                           shape: BoxShape.circle,
                         ),
-                  child: widget.isBusy
+                  child: isBusy
                       ? CircularProgressIndicator(
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.black26),
@@ -90,15 +85,15 @@ class _ActionButtonState extends State<ActionButton> {
                       children: [
                         Expanded(
                           child: Opacity(
-                            opacity: 1 - _activePage < _minimumIconOpacity
+                            opacity: 1 - viewPage < _minimumIconOpacity
                                 ? _minimumIconOpacity
-                                : 1 - _activePage,
+                                : 1 - viewPage,
                             child: Transform.scale(
-                              scale: 1 - _activePage < _minimumIconSize
+                              scale: 1 - viewPage < _minimumIconSize
                                   ? _minimumIconSize
-                                  : 1 - _activePage,
+                                  : 1 - viewPage,
                               child: Image.asset(
-                                "images/video_call.png",
+                                "images/call_icon.png",
                                 height: 50,
                                 width: 50,
                               ),
@@ -108,15 +103,15 @@ class _ActionButtonState extends State<ActionButton> {
                         // SizedBox(width: 20),
                         Expanded(
                           child: Opacity(
-                            opacity: _activePage < _minimumIconOpacity
+                            opacity: viewPage < _minimumIconOpacity
                                 ? _minimumIconOpacity
-                                : _activePage,
+                                : viewPage,
                             child: Transform.scale(
-                              scale: _activePage < _minimumIconSize
+                              scale: viewPage < _minimumIconSize
                                   ? _minimumIconSize
-                                  : _activePage,
+                                  : viewPage,
                               child: Image.asset(
-                                "images/chat.png",
+                                "images/chat_icon.png",
                                 height: 50,
                                 width: 50,
                               ),

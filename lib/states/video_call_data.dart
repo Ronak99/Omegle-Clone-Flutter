@@ -73,14 +73,14 @@ class VideoCallData extends ChangeNotifier {
 
     BuildContext context = OneContext.instance.context!;
 
-    VideoRoomData _videoRoomData = Provider.of<VideoRoomData>(context, listen: false);
-    UserData _userData = Provider.of<UserData>(context, listen: false);
+    // VideoRoomData _videoRoomData = Provider.of<VideoRoomData>(context, listen: false);
+    // UserData _userData = Provider.of<UserData>(context, listen: false);
 
-    // close the current room
-    _videoRoomData.closeRoom(uid: _userData.getUser.uid);
+    // // close the current room
+    // _videoRoomData.closeRoom(uid: _userData.getUser.uid);
 
-    // Search for a random user
-    _videoRoomData.searchAndJoinChannel();
+    // // Search for a random user
+    // _videoRoomData.searchAndJoinChannel();
   }
 
   RtcEngineEventHandler get _engineEventHandler => RtcEngineEventHandler(

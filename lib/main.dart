@@ -1,21 +1,19 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:omegle_clone/states/auth_data.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/states/engagement_data.dart';
-import 'package:omegle_clone/states/room/chat_room_data.dart';
-import 'package:omegle_clone/states/room/room_data.dart';
-import 'package:omegle_clone/states/room/video_room_data.dart';
 import 'package:omegle_clone/states/user_data.dart';
 import 'package:omegle_clone/states/video_call_data.dart';
 import 'package:omegle_clone/ui/screens/home/home_screen.dart';
 import 'package:omegle_clone/utils/utils.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:one_context/one_context.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -23,14 +21,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return provider.MultiProvider(
       providers: [
-        ChangeNotifierProvider<UserData>(create: (_) => UserData()),
-        ChangeNotifierProvider<ChatRoomData>(create: (_) => ChatRoomData()),
-        ChangeNotifierProvider<VideoRoomData>(create: (_) => VideoRoomData()),
-        ChangeNotifierProvider<EngagementData>(create: (_) => EngagementData()),
-        ChangeNotifierProvider<AuthData>(create: (_) => AuthData()),
-        ChangeNotifierProvider<VideoCallData>(create: (_) => VideoCallData()),
+        provider.ChangeNotifierProvider<UserData>(create: (_) => UserData()),
+        // provider.ChangeNotifierProvider<ChatRoomData>(create: (_) => ChatRoomData()),
+        // provider.ChangeNotifierProvider<VideoRoomData>(create: (_) => VideoRoomData()),
+        provider.ChangeNotifierProvider<EngagementData>(
+            create: (_) => EngagementData()),
+        provider.ChangeNotifierProvider<VideoCallData>(
+            create: (_) => VideoCallData()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

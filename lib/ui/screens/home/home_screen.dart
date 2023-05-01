@@ -1,143 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:omegle_clone/states/engagement_data.dart';
-import 'package:omegle_clone/states/room/chat_room_data.dart';
-import 'package:omegle_clone/states/room/video_room_data.dart';
-import 'package:omegle_clone/states/user_data.dart';
-import 'package:omegle_clone/ui/screens/call/call_screen.dart';
-import 'package:omegle_clone/ui/screens/home/action_button.dart';
-import 'package:omegle_clone/utils/utils.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:omegle_clone/constants/numerics.dart';
+import 'package:omegle_clone/provider/auth_provider.dart';
+import 'package:omegle_clone/ui/screens/home/pages/call_view_page.dart';
+import 'package:omegle_clone/ui/screens/home/pages/chat_view_page.dart';
+import 'package:omegle_clone/ui/screens/home/viewmodel/home_screen_viewmodel.dart';
+import 'package:omegle_clone/ui/screens/home/widgets/action_button.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends HookConsumerWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    // read this to initialize everything for the first time
+    ref.read(authProvider);
+    var homeScreenViewModelRef = ref.read(homeScreenViewModel.notifier);
+    var homeScreenState = ref.watch(homeScreenViewModel);
 
-class _HomeScreenState extends State<HomeScreen> {
-  // page controller
-  final PageController _pageController = PageController();
-
-  // local state
-  bool get isOnSearchChatPage => _pageController.page == 1;
-  bool get isOnSearchVideoPage => _pageController.page == 0;
-
-  // global state
-  late UserData _userData;
-  late EngagementData _engagementData;
-  late VideoRoomData _videoRoomData;
-  late ChatRoomData _chatRoomData;
-
-  @override
-  void initState() {
-    super.initState();
-    _userData = Provider.of<UserData>(context, listen: false);
-    _engagementData = Provider.of<EngagementData>(context, listen: false);
-    _videoRoomData = Provider.of<VideoRoomData>(context, listen: false);
-    _chatRoomData = Provider.of<ChatRoomData>(context, listen: false);
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _userData.initialize();
-      Future.delayed(Duration(seconds: 2), () {
-        _engagementData.initialize(_userData.getUser.uid);
-      });
-    });
-  }
-
-  void _onActionButtonTap() {
-    if (isOnSearchChatPage) {
-      _chatRoomData.searchRandomUser(
-        currentUserId: _userData.getUser.uid,
-        isEngagementNull: _engagementData.engagement == null,
-      );
-    } else {
-      // Utils.navigateTo(JoinChannelVideo());
-      Utils.navigateTo(CallScreen());
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _videoRoomData = Provider.of<VideoRoomData>(context);
-    _chatRoomData = Provider.of<ChatRoomData>(context);
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 25),
-          child: Stack(
-            children: [
-              PageView(
-                controller: _pageController,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SvgPicture.asset("images/welcome-light.svg"),
-                      Text(
-                        'Welcome!',
-                        style: TextStyle(
-                          color: Color(0xff414141),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 35,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Tap on the button to talk to randomly video chat with someone',
-                        style: TextStyle(
-                          color: Color(0xff595959),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 25,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SvgPicture.asset("images/welcome-light.svg"),
-                      Text(
-                        'Welcome!',
-                        style: TextStyle(
-                          color: Color(0xff414141),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 35,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Tap on the button to chat randomly with someone',
-                        style: TextStyle(
-                          color: Color(0xff595959),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 25,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              ActionButton(
-                controller: _pageController,
-                isBusy: _videoRoomData.isSearching || _chatRoomData.isSearching,
-                onPressed: _onActionButtonTap,
-              ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          PageView(
+            controller: homeScreenViewModelRef.pageController,
+            children: const [
+              CallViewPage(),
+              ChatViewPage(),
             ],
           ),
-        ),
+          IgnorePointer(
+            ignoring: true,
+            child: Opacity(
+              opacity: 1 - homeScreenState.viewPage,
+              child: SizedBox(
+                height: gethomePageBannerHeight(context),
+                child: SvgPicture.asset("images/call_view_banner.svg"),
+              ),
+            ),
+          ),
+          IgnorePointer(
+            ignoring: true,
+            child: Opacity(
+              opacity: homeScreenState.viewPage,
+              child: SizedBox(
+                height: gethomePageBannerHeight(context),
+                child: SvgPicture.asset("images/chat_view_banner.svg"),
+              ),
+            ),
+          ),
+          ActionButton(
+            viewPage: homeScreenState.viewPage,
+            isBusy: homeScreenState.isBusy,
+            onPressed: homeScreenViewModelRef.onActionButtonTap,
+          ),
+        ],
       ),
     );
   }

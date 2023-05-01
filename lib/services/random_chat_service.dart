@@ -22,8 +22,7 @@ class RandomChatService {
   }
 
   Future<void> searchUserToChat({
-    required String uid,
-    required VoidCallback onConnectingUsers,
+    required String uid
   }) async {
     try {
       const _engagementType = EngagegmentType.chat;
@@ -72,8 +71,7 @@ class RandomChatService {
       if (_pickedUserEngagement.isBusy) {
         if (_pickedUserEngagement.connectedWith != uid) {
            await searchUserToChat(
-            uid: uid,
-            onConnectingUsers: onConnectingUsers,
+            uid: uid
           );
 
           return;
@@ -105,9 +103,6 @@ class RandomChatService {
           roomId: _roomId,
           connectedWith: _pickedUserId,
         );
-
-        // We started the search first, so we will assume command
-        onConnectingUsers();
         return;
       }
     } on CustomException catch (e) {
@@ -280,7 +275,7 @@ class RandomChatService {
         .snapshots();
   }
 
-  Stream<DocumentSnapshot<ChatRoom>> chatRoomStream(
+  Stream<DocumentSnapshot<ChatRoom>> getChatRoom(
       {required String roomId, required bool isVideoRoom}) {
     return FirestoreRefs.getChatRoomCollection(isVideoRoom: isVideoRoom)
         .doc(roomId)

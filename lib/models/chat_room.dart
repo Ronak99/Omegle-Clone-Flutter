@@ -38,5 +38,19 @@ class ChatRoom {
     );
   }
 
+  factory ChatRoom.empty() {
+    return ChatRoom(
+      roomId: '',
+      creatorId: '',
+      joineeId: '',
+      type: '',
+      isEngaged: false,
+      closedBy: '',
+    );
+  }
+
   bool get isVideoRoom => type == CHAT_ROOM_TYPE_VIDEO;
+
+  // Gives the uid of the other user that has joined in the room
+  String getRemoteUid(String uid) => creatorId == uid ? joineeId : creatorId;
 }

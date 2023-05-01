@@ -4,8 +4,9 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:omegle_clone/provider/engagement_provider.dart';
+import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/ui/screens/auth/otp_screen.dart';
-import 'package:omegle_clone/ui/screens/auth_state_builder.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
 import 'package:riverpod/riverpod.dart';
@@ -18,17 +19,6 @@ var authProvider = StateNotifierProvider<AuthStateNotifier, AuthState>(
 class AuthStateNotifier extends StateNotifier<AuthState> {
   StateNotifierProviderRef ref;
 
-  // Constructor
-  AuthStateNotifier(this.ref) : super(AuthState()) {
-    _init();
-  }
-
-  _init() {
-    _subscription = _authService.authChanges().listen((event) {
-      state = state.copyWith(isLoggedIn: event != null);
-    });
-  }
-
   // Services
   final AuthService _authService = AuthService();
 
@@ -39,6 +29,19 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       TextEditingController(text: '+911234567890');
   final TextEditingController otpFieldController =
       TextEditingController(text: '123456');
+
+  // Constructor
+  AuthStateNotifier(this.ref) : super(AuthState()) {
+    _init();
+  }
+
+  _init() {
+    _subscription = _authService.authChanges().listen((user) {
+      state = state.copyWith(isLoggedIn: user != null, user: user);
+
+      ref.read(engagementProvider);
+    });
+  }
 
   /// Should be called from the OTP Screen
   _verifyOtp({
@@ -58,9 +61,6 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       await _authService.signInWithAuthCredential(
         authCredential: phoneAuthCredential,
       );
-
-      // Remove all the previous routes and push the AuthStateBuilder
-      Utils.removeAllAndPush(AuthStateBuilder());
     } on CustomException {
       rethrow;
     }
@@ -109,6 +109,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   signOut() async {
     try {
       await _authService.signOut();
+      ref.read(engagementProvider.notifier).reset();
+      ref.read(userProvider.notifier).reset();
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);
     }
@@ -136,18 +138,25 @@ class AuthState {
 
   // is true if a user is logged in
   bool isLoggedIn;
+
+  // FirebaseUser instance
+  User? user;
+
   AuthState({
     this.isBusy = false,
     this.isLoggedIn = false,
+    this.user,
   });
 
   AuthState copyWith({
     bool? isBusy,
     bool? isLoggedIn,
+    User? user,
   }) {
     return AuthState(
       isBusy: isBusy ?? this.isBusy,
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+      user: user ?? this.user,
     );
   }
 }
