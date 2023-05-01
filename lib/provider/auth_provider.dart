@@ -109,7 +109,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   signOut() async {
     try {
       await _authService.signOut();
-      ref.read(engagementProvider.notifier).reset();
+      // ref.read(engagementProvider.notifier).reset();
       ref.read(userProvider.notifier).reset();
     } on CustomException catch (e) {
       Utils.errorSnackbar(e.message);

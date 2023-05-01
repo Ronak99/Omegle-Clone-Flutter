@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
-import 'package:omegle_clone/provider/engagement_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
 import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
@@ -37,23 +36,8 @@ class HomeScreenViewModel extends StateNotifier<HomeScreenState> {
     // mark busy
     state = state.copyWith(isBusy: true);
 
-    try {
-      // search user
-      String uid = ref.read(userProvider).uid;
-
-      if (state.isChatPageActive) {
-        await _randomChatService.searchUserToChat(uid: uid);
-      } else {
-        await _randomChatService.searchUserToVideoChat(uid: uid);
-      }
-
-      if(ref.read(engagementProvider).roomId != null){
-        Utils.navigateTo(ChatScreen());
-      }
-    } on CustomException catch (e) {
-      // catch error and display it
-      Utils.errorSnackbar(e.message);
-    }
+    // search 
+    await ref.read(chatRoomProvider.notifier).searchUserToChat(forVideoCall: state.isVideoPageActive);
 
     // mark busy
     state = state.copyWith(isBusy: false);

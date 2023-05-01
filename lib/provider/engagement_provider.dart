@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/models/engagement.dart';
-import 'package:omegle_clone/provider/chat_room_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/services/engagement_service.dart';
 import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
@@ -28,24 +27,33 @@ class EngagementNotifier extends StateNotifier<Engagement> {
     _init();
   }
 
-  _init() {
+  _init() async {
     String uid = ref.read(userProvider).uid;
-
-    _subscription =
-        _engagementService.userEngagementStream(uid: uid).listen((engagement) {
-      if (!engagement.exists) {
-        _engagementService.createInitialEngagementRecord(uid: uid);
-      } else {
-        state = engagement.data()!;
-      }
-    });
+    
+    _subscription = _engagementService.userEngagementStream(uid: uid).listen(
+        (engagementDoc) => _engagementListener(engagementDoc, uid: uid));
   }
 
-  
+  void _engagementListener(DocumentSnapshot<Engagement> engagementDoc,
+      {required String uid}) {
+    if (!engagementDoc.exists) {
+      _engagementService.createInitialEngagementRecord(uid: uid);
+    } else {
+      if (engagementDoc.data() == null) return;
 
-  reset() {
-    _subscription?.cancel();
-    state = Engagement.empty();
+      // if user was not busy previously
+      if (!state.isBusy) {
+        // but gets busy
+        if (engagementDoc.data()!.isBusy) {
+          // and it gets busy for chat
+          if (engagementDoc.data()!.isForChat) {
+            Utils.navigateTo(ChatScreen());
+          }
+        }
+      }
+
+      state = engagementDoc.data()!;
+    }
   }
 
   @override

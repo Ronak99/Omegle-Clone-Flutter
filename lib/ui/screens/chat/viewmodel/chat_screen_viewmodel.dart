@@ -6,10 +6,11 @@ import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/states/back_button_data.dart';
+import 'package:omegle_clone/ui/screens/home/viewmodel/home_screen_viewmodel.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
 var chatScreenViewModel =
-    StateNotifierProvider<ChatScreenViewModel, ChatScreenState>(
+    StateNotifierProvider.autoDispose<ChatScreenViewModel, ChatScreenState>(
         (ref) => ChatScreenViewModel(ref));
 
 class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
@@ -18,12 +19,15 @@ class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
   // Local State
   TextEditingController textEditingController = TextEditingController();
   final BackButtonData _backButtonData = BackButtonData();
+  bool isActive = false;
 
   ChatScreenViewModel(this.ref) : super(ChatScreenState()) {
     _init();
   }
 
-  _init() {}
+  _init() {
+    isActive = true;
+  }
 
   sendMessage() {
     if (textEditingController.text.trim().isEmpty) {
@@ -48,6 +52,11 @@ class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
     Utils.pop();
   }
 
+  onSearchAnotherChatButtonTap() {
+    Utils.pop();
+    ref.read(homeScreenViewModel.notifier).onActionButtonTap();
+  }
+
   Future<bool> onWillPop() async {
     if (ref.read(chatRoomProvider) == null) {
       return false;
@@ -55,6 +64,12 @@ class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
       return true;
     }
     return await _backButtonData.showGoBack(leaveRoom);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    isActive = false;
   }
 }
 

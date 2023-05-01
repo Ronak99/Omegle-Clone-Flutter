@@ -1,7 +1,6 @@
 // supplies engagement state of the currently logged in user throughout the app
 
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,17 +11,19 @@ import 'package:omegle_clone/provider/engagement_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/services/engagement_service.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
-import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
+import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
-var chatRoomProvider = StateNotifierProvider<ChatRoomNotifier, ChatRoom?>(
-    (ref) => ChatRoomNotifier(ref));
+var chatRoomProvider =
+    StateNotifierProvider.autoDispose<ChatRoomNotifier, ChatRoom?>(
+        (ref) => ChatRoomNotifier(ref));
 
 class ChatRoomNotifier extends StateNotifier<ChatRoom?> {
   StateNotifierProviderRef ref;
 
   // Services
   final RandomChatService _randomChatService = RandomChatService();
+  final EngagementService _engagementService = EngagementService();
 
   // Local State
   StreamSubscription<DocumentSnapshot<ChatRoom?>>? _chatRoomSubscription;
@@ -32,19 +33,19 @@ class ChatRoomNotifier extends StateNotifier<ChatRoom?> {
     _init();
   }
 
-  _init() {
-    String? roomId = ref.watch(engagementProvider).roomId;
+  _init() async {
+    String? roomId = ref.read(engagementProvider).roomId;
 
     if (roomId == null) {
-      reset();
+      await reset();
       return;
     }
 
     _chatRoomSubscription = _randomChatService
         .getChatRoom(roomId: roomId, isVideoRoom: false)
         .listen((chatRoomDoc) {
-      if (chatRoomDoc.exists) {
-        state =  chatRoomDoc.data();
+      if (chatRoomDoc.exists && chatRoomDoc.data() != null) {
+        state = chatRoomDoc.data()!;
       }
     });
   }
@@ -63,19 +64,34 @@ class ChatRoomNotifier extends StateNotifier<ChatRoom?> {
     );
 
     // mark both the user's free
-    // _engagementService.markUserFree(uid: uid);
-    // _engagementService.markUserFree(uid: state.chatRoom!.getRemoteUid(uid));
+    _engagementService.markUserFree(uid: uid);
+    _engagementService.markUserFree(uid: state!.getRemoteUid(uid));
   }
 
-  reset() {
-    _chatRoomSubscription?.cancel();
-    // _messageSubscription?.cancel();
+  Future<void> searchUserToChat({required bool forVideoCall}) async {
+    try {
+      // search user
+      String uid = ref.read(userProvider).uid;
+
+      if (!forVideoCall) {
+        await _randomChatService.searchUserToChat(uid: uid);
+      } else {
+        await _randomChatService.searchUserToVideoChat(uid: uid);
+      }
+    } on CustomException catch (e) {
+      print(e);
+      // catch error and display it
+      Utils.errorSnackbar(e.message);
+    }
+  }
+
+  reset() async {
+    await _chatRoomSubscription?.cancel();
   }
 
   @override
   void dispose() {
     _chatRoomSubscription?.cancel();
-    // _messageSubscription?.cancel();
     super.dispose();
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
-import 'package:omegle_clone/ui/screens/chat/components/chat_list_view.dart';
 import 'package:omegle_clone/ui/screens/chat/viewmodel/chat_screen_viewmodel.dart';
+
+import 'components/chat_list/chat_list_view.dart';
 
 class ChatScreen extends ConsumerWidget {
   const ChatScreen({
@@ -26,6 +27,17 @@ class ChatScreen extends ConsumerWidget {
         body: Column(
           children: [
             SizedBox(height: MediaQuery.of(context).padding.top),
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                chatRoom.roomId,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            SizedBox(height: 15),
             if (chatRoom.isEngaged)
               Align(
                 alignment: Alignment.center,
@@ -47,14 +59,8 @@ class ChatScreen extends ConsumerWidget {
                       SizedBox(height: 8),
                       TextButton(
                         child: Text("Search another chat"),
-                        onPressed: () {
-                          // _chatData.searchRandomUser(
-                          //   currentUserId: _userData.getUser.uid,
-                          //   isEngagementNull: false,
-                          // );
-                          // _chatData.deleteRoom();
-                          // Utils.pop();
-                        },
+                        onPressed:
+                            chatScreenViewModelRef.onSearchAnotherChatButtonTap,
                       ),
                     ],
                   );

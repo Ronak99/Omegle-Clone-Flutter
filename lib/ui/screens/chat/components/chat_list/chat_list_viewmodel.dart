@@ -6,14 +6,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:omegle_clone/models/message.dart';
-import 'package:omegle_clone/provider/chat_room_provider.dart';
+import 'package:omegle_clone/provider/engagement_provider.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
 
-var messagesProvider =
-    StateNotifierProvider<MessageListNotifier, List<Message>>(
-        (ref) => MessageListNotifier(ref));
+var chatListViewModel =
+    StateNotifierProvider.autoDispose<ChatListViewModel, List<Message>>(
+        (ref) => ChatListViewModel(ref));
 
-class MessageListNotifier extends StateNotifier<List<Message>> {
+class ChatListViewModel extends StateNotifier<List<Message>> {
   StateNotifierProviderRef ref;
 
   // Services
@@ -23,13 +23,16 @@ class MessageListNotifier extends StateNotifier<List<Message>> {
   StreamSubscription<QuerySnapshot<Message>>? _messageSubscription;
 
 // Constructor
-  MessageListNotifier(this.ref) : super([]) {
-    _init();
+  ChatListViewModel(this.ref) : super([]) {
+    init();
   }
 
-  _init() async {
-    String roomId = ref.read(chatRoomProvider)!.roomId;
-    await Future.delayed(Duration(seconds: 1));
+  init() async {
+    String? roomId = ref.read(engagementProvider).roomId;
+    if (roomId == null) {
+      reset(shouldClearMessageList: false);
+      return;
+    }
     _messageSubscription = _randomChatService
         .queryRoomChat(roomId: roomId)
         .listen((messageListQuery) {
@@ -37,9 +40,14 @@ class MessageListNotifier extends StateNotifier<List<Message>> {
     });
   }
 
+  reset({bool shouldClearMessageList = false}) async {
+      state = [];
+    await _messageSubscription?.cancel();
+  }
+
   @override
   void dispose() {
-    _messageSubscription?.cancel();
+    reset();
     super.dispose();
   }
 }
