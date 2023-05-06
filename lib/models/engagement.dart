@@ -1,32 +1,30 @@
 import 'package:omegle_clone/enums/engagement_status.dart';
 import 'package:omegle_clone/enums/engagement_type.dart';
-import 'package:omegle_clone/extensions/engagement_status_extension.dart';
-import 'package:omegle_clone/extensions/string_extensions.dart';
 
 class Engagement {
   String uid;
-  EngagementStatus engagementStatus;
+  String engagementStatus;
   String? roomId;
   int? searchStartedOn;
   String? connectedWith;
-  EngagegmentType? engagegmentType;
+  String? engagementType;
   Engagement({
     required this.uid,
     this.roomId,
     this.connectedWith,
     required this.engagementStatus,
     this.searchStartedOn,
-    this.engagegmentType,
+    this.engagementType,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
       'room_id': roomId,
-      'status': engagementStatus.toRawValue,
+      'status': engagementStatus,
       'search_started_on': searchStartedOn,
       'connected_with': connectedWith,
-      'type': engagegmentType,
+      'type': engagementType,
     };
   }
 
@@ -44,15 +42,15 @@ class Engagement {
     return Engagement(
       uid: map['uid'],
       roomId: map['room_id'],
-      engagementStatus: _engagementStatus.toEngagementStatus,
+      engagementStatus: _engagementStatus,
       searchStartedOn: map['search_started_on'],
       connectedWith: map['connected_with'],
-      engagegmentType: _engagementType?.toEngagementType,
+      engagementType: _engagementType,
     );
   }
 
-  bool get isBusy => engagementStatus == EngagementStatus.busy;
+  bool get isBusy => engagementStatus == EngagementStatus.engaged;
 
-  bool get isForVideo => engagegmentType == EngagegmentType.video;
-  bool get isForChat => engagegmentType == EngagegmentType.chat;
+  bool get isForVideo => engagementType == EngagementType.video;
+  bool get isForChat => engagementType == EngagementType.chat;
 }

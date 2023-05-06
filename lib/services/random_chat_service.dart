@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:omegle_clone/enums/engagement_type.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/engagement.dart';
@@ -21,16 +20,17 @@ class RandomChatService {
     }
   }
 
-  Future<void> searchUserToChat({
-    required String uid
-  }) async {
+  Future<void> searchUserToChat({required String uid}) async {
     try {
-      const _engagementType = EngagegmentType.chat;
+      const _engagementType = EngagementType.chat;
+
+      // let the users mark themselves free
+      await _engagementService.markUserFree(uid: uid);
 
       int _searchStartTs =
           await _engagementService.setEngagementStatusToSearching(
         uid,
-        engagegmentType: _engagementType,
+        engagementType: _engagementType,
       );
 
       // query all the free users
@@ -70,16 +70,13 @@ class RandomChatService {
 
       if (_pickedUserEngagement.isBusy) {
         if (_pickedUserEngagement.connectedWith != uid) {
-           await searchUserToChat(
-            uid: uid
-          );
+          await searchUserToChat(uid: uid);
 
           return;
         }
       }
 
       if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
-
         // Generate a room id
         String _roomId = Utils.generateRandomId();
 
@@ -95,7 +92,6 @@ class RandomChatService {
         // create chat room
         await createChatRoom(chatRoom: _chatRoom);
 
-
         // If they are not marked busy, then mark them busy, with chat room
         // mark both the users busy
         await _engagementService.connectChatUsers(
@@ -105,19 +101,22 @@ class RandomChatService {
         );
         return;
       }
-    } on CustomException catch (e) {
+    } on CustomException {
       rethrow;
     }
   }
 
   Future<String> searchUserToVideoChat({required String uid}) async {
     try {
-      const _engagementType = EngagegmentType.video;
+      const _engagementType = EngagementType.video;
+
+      // let the users mark themselves free
+      await _engagementService.markUserFree(uid: uid);
 
       int _searchStartTs =
           await _engagementService.setEngagementStatusToSearching(
         uid,
-        engagegmentType: _engagementType,
+        engagementType: _engagementType,
       );
 
       _checkIfShouldKeepGoing();
@@ -152,6 +151,7 @@ class RandomChatService {
       _checkIfShouldKeepGoing();
 
       if (_listOfPotentialUsers.isEmpty) {
+        await _engagementService.markUserFree(uid: uid);
         throw CustomException("No active users found", code: 'no_user_found');
       }
 

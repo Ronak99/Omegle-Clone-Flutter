@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:omegle_clone/enums/engagement_status.dart';
 import 'package:omegle_clone/enums/engagement_type.dart';
-import 'package:omegle_clone/extensions/engagement_status_extension.dart';
-import 'package:omegle_clone/extensions/engagement_type_extension.dart';
 import 'package:omegle_clone/models/engagement.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/firestore_refs.dart';
@@ -20,13 +18,13 @@ class EngagementService {
 
   Future<List<String>> queryPotentialUsers({
     required String idToExclude,
-    required EngagegmentType engagementType,
+    required String engagementType,
   }) async {
     try {
       QuerySnapshot _querySnapshot = await FirestoreRefs.engagementCollection
           .where('uid', isNotEqualTo: idToExclude)
           .where('status', isEqualTo: 'searching')
-          .where('type', isEqualTo: engagementType.toRawValue)
+          .where('type', isEqualTo: engagementType)
           .get();
       return _querySnapshot.docs.map((e) => e.id).toList();
     } on FirebaseException catch (e) {
@@ -37,7 +35,7 @@ class EngagementService {
   markUserFree({required String uid}) async {
     try {
       await FirestoreRefs.engagementCollection.doc(uid).update({
-        'status': EngagementStatus.free.toRawValue,
+        'status': EngagementStatus.free,
         'search_started_on': null,
         'room_id': null,
         'connected_with': null,
@@ -50,15 +48,15 @@ class EngagementService {
 
   Future<int> setEngagementStatusToSearching(
     String uid, {
-    required EngagegmentType engagegmentType,
+    required String engagementType,
   }) async {
     try {
       int _searchStartTs = DateTime.now().millisecondsSinceEpoch;
 
       await FirestoreRefs.engagementCollection.doc(uid).update({
-        'status': EngagementStatus.searching.toRawValue,
+        'status': EngagementStatus.searching,
         'search_started_on': _searchStartTs,
-        'type': engagegmentType.toRawValue,
+        'type': engagementType,
       });
 
       return _searchStartTs;
@@ -74,12 +72,12 @@ class EngagementService {
   }) async {
     try {
       await FirestoreRefs.engagementCollection.doc(uid).update({
-        'status': EngagementStatus.busy.toRawValue,
+        'status': EngagementStatus.engaged,
         'room_id': roomId,
         'connected_with': connectedWith,
       });
       await FirestoreRefs.engagementCollection.doc(connectedWith).update({
-        'status': EngagementStatus.busy.toRawValue,
+        'status': EngagementStatus.engaged,
         'room_id': roomId,
         'connected_with': uid,
       });
@@ -94,20 +92,13 @@ class EngagementService {
     required String connectedWith,
   }) async {
     try {
-      // AgoraApi _agoraApi = AgoraApi();
-
-      // String _localUserRoomToken =
-      //     await _agoraApi.getRtcRoomToken(uid: uid, channelName: roomId);
-      // String _remoteUserRoomToken = await _agoraApi.getRtcRoomToken(
-      //     uid: connectedWith, channelName: roomId);
-
       await FirestoreRefs.engagementCollection.doc(uid).update({
-        'status': EngagementStatus.busy.toRawValue,
+        'status': EngagementStatus.engaged,
         'room_id': roomId,
         'connected_with': connectedWith,
       });
       await FirestoreRefs.engagementCollection.doc(connectedWith).update({
-        'status': EngagementStatus.busy.toRawValue,
+        'status': EngagementStatus.engaged,
         'room_id': roomId,
         'connected_with': uid,
       });

@@ -21,7 +21,9 @@ class AgoraApi {
         data: _dataMap,
       );
 
-      if (_response.data == null) throw CustomException("Data was null");
+      if (_response.data == null) {
+        throw CustomException("Data was null");
+      }
 
       if (_response.statusCode == 200) {
         return _response.data!['key'];

@@ -3,10 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
-import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
-import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
-import 'package:omegle_clone/utils/custom_exception.dart';
+import 'package:omegle_clone/ui/screens/call/call_screen.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
 var homeScreenViewModel =
@@ -34,13 +32,19 @@ class HomeScreenViewModel extends StateNotifier<HomeScreenState> {
     if (state.isBusy) return;
 
     // mark busy
-    state = state.copyWith(isBusy: true);
 
-    // search 
-    await ref.read(chatRoomProvider.notifier).searchUserToChat(forVideoCall: state.isVideoPageActive);
+    // search
+    if (state.isVideoPageActive) {
+      Utils.navigateTo(CallScreen());
+    } else {
+      state = state.copyWith(isBusy: true);
+      await ref
+          .read(chatRoomProvider.notifier)
+          .searchUserToChat(forVideoCall: state.isVideoPageActive);
+      state = state.copyWith(isBusy: false);
+    }
 
     // mark busy
-    state = state.copyWith(isBusy: false);
   }
 }
 
