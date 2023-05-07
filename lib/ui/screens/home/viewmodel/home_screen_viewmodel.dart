@@ -46,6 +46,24 @@ class HomeScreenViewModel extends StateNotifier<HomeScreenState> {
 
     // mark busy
   }
+
+  onInactiveButtonTap() {
+    // if (state.isBusy) return;
+    if (state.isVideoPageActive) {
+      // this means, in active button tap callback was triggered from chat icon
+      pageController.animateToPage(
+        1,
+        duration: Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      pageController.animateToPage(
+        0,
+        duration: Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 }
 
 class HomeScreenState {
