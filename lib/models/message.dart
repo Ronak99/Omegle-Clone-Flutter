@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Message {
   String id;
   String content;
   String sentBy;
-  int sentTs;
+  Timestamp sentTs;
   String roomId;
   Message({
     required this.id,

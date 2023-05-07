@@ -1,5 +1,6 @@
 // home screen view model will be responsible for taking care of home screen state
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/models/message.dart';
@@ -39,7 +40,7 @@ class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
       id: Utils.generateRandomId(),
       content: textEditingController.text,
       sentBy: ref.read(userProvider).uid,
-      sentTs: DateTime.now().millisecondsSinceEpoch,
+      sentTs: Timestamp.now(),
       roomId: ref.read(chatRoomProvider)!.roomId,
     );
 
