@@ -1,4 +1,4 @@
-import '../constants/strings.dart';
+import 'package:omegle_clone/enums/chat_room_type.dart';
 
 class ChatRoom {
   String roomId;
@@ -49,7 +49,7 @@ class ChatRoom {
     );
   }
 
-  bool get isVideoRoom => type == CHAT_ROOM_TYPE_VIDEO;
+  bool get isVideoRoom => type == ChatRoomType.video;
 
   // Gives the uid of the other user that has joined in the room
   String getRemoteUid(String uid) => creatorId == uid ? joineeId : creatorId;
