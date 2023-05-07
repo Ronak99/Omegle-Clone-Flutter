@@ -1,33 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:omegle_clone/models/message.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:omegle_clone/provider/engagement_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
+import 'package:omegle_clone/ui/screens/chat/components/chat_list/chat_list_viewmodel.dart';
 import 'package:omegle_clone/ui/screens/chat/widgets/chat_bubble.dart';
 
-import 'chat_list_viewmodel.dart';
-
-class ChatListView extends ConsumerWidget {
+class ChatListView extends HookConsumerWidget {
   const ChatListView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<Message> messages = ref.watch(chatListViewModel);
-    String uid = ref.read(userProvider).uid;
+    final currentRoomIdNotifier = useState('');
 
-    if (messages.isEmpty) {
-      return Center(child: Text('Send the first message'));
+    // init state
+    useEffect(() {
+      String? roomId = ref.read(engagementProvider).roomId;
+      if (roomId != null && currentRoomIdNotifier.value.isEmpty) {
+        currentRoomIdNotifier.value = roomId;
+      }
+      return () {};
+    }, [/* refresh on value change : */ ref.watch(engagementProvider)]);
+
+    if (currentRoomIdNotifier.value.isEmpty) {
+      return Center(child: CircularProgressIndicator());
     }
 
-    return ListView.builder(
-      itemCount: messages.length,
-      reverse: true,
-      padding: EdgeInsets.symmetric(horizontal: 12),
-      itemBuilder: (context, i) {
-        return ChatBubble(
-          message: messages[i],
-          currentUserId: uid,
-        );
-      },
+    ChatListState chatListState = ref.watch(chatListViewModel);
+    String uid = ref.read(userProvider).uid;
+
+    if (chatListState.messages.isEmpty) {
+      return Center(
+          child: Text(
+              'Room ID: ${chatListState.roomId} | Send your first messgae'));
+    }
+
+    return Column(
+      children: [
+        Text("Room ID: ${chatListState.roomId}"),
+        SizedBox(height: 25),
+        Expanded(
+          child: ListView.builder(
+            itemCount: chatListState.messages.length,
+            reverse: true,
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            itemBuilder: (context, i) {
+              return ChatBubble(
+                message: chatListState.messages[i],
+                currentUserId: uid,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
