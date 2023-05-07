@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/constants/colors.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
 import 'package:omegle_clone/ui/screens/chat/viewmodel/chat_screen_viewmodel.dart';
+import 'package:omegle_clone/ui/widgets/utility_widgets.dart';
 
 import 'components/chat_list/chat_list_view.dart';
 
@@ -15,92 +17,129 @@ class ChatScreen extends ConsumerWidget {
     var chatRoom = ref.watch(chatRoomProvider);
     var chatScreenViewModelRef = ref.read(chatScreenViewModel.notifier);
 
-    if (chatRoom == null) {
-      return Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return WillPopScope(
       onWillPop: chatScreenViewModelRef.onWillPop,
       child: Scaffold(
-        body: Column(
-          children: [
-            SizedBox(height: MediaQuery.of(context).padding.top),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                chatRoom.roomId,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            SizedBox(height: 15),
-            if (chatRoom.isEngaged)
-              Align(
-                alignment: Alignment.center,
-                child: Builder(builder: (context) {
-                  return TextButton(
-                    child: Text("Leave Room"),
-                    onPressed: chatScreenViewModelRef.leaveRoom,
-                  );
-                }),
-              ),
-            SizedBox(height: 12),
-            Expanded(child: ChatListView()),
-            Builder(
-              builder: (context) {
-                if (!chatRoom.isEngaged) {
-                  return Column(
-                    children: [
-                      Text('This room was closed'),
-                      SizedBox(height: 8),
-                      TextButton(
-                        child: Text("Search another chat"),
-                        onPressed:
-                            chatScreenViewModelRef.onSearchAnotherChatButtonTap,
-                      ),
-                    ],
-                  );
-                }
-
-                return Row(
-                  children: [
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller:
-                            chatScreenViewModelRef.textEditingController,
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
-                        decoration: InputDecoration(
-                          isDense: true,
-                          hintText: 'Send a new message...',
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              width: .5,
-                              color: Colors.black38,
-                            ),
-                          ),
-                        ),
+        backgroundColor: backgroundColor,
+        appBar: (chatRoom != null && chatRoom.isEngaged)
+            ? AppBar(
+                backgroundColor: brightActionColor,
+                leadingWidth: 30,
+                actions: [
+                  Tooltip(
+                    message: 'Leave Room',
+                    child: IconButton(
+                      onPressed: chatScreenViewModelRef.leaveRoom,
+                      icon: Icon(
+                        Icons.logout,
                       ),
                     ),
-                    SizedBox(width: 5),
-                    IconButton(
-                      icon: Icon(
-                        Icons.send,
-                        color: Colors.blue,
-                      ),
-                      onPressed: chatScreenViewModelRef.sendMessage,
+                  ),
+                ],
+                title: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: subtleSurfaceColor,
+                      backgroundImage:
+                          NetworkImage("https://www.picsum.photos/100"),
+                      radius: 20,
+                    ),
+                    SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text('Stranger'),
+                        SizedBox(height: 3),
+                        Text(
+                          'Online',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
                     ),
                   ],
-                );
-              },
+                ),
+              )
+            : null,
+        body: Column(
+          children: [
+            Expanded(
+              child: chatRoom == null
+                  ? Center(child: kDefaultCircularProgressIndicator)
+                  : ChatListView(),
             ),
-            SizedBox(height: 12),
+            if (chatRoom != null)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 25),
+                height: 65,
+                decoration: BoxDecoration(
+                  color: subtleSurfaceColor,
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.white10,
+                      width: 2,
+                    ),
+                  ),
+                ),
+                child: chatRoom.isEngaged
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller:
+                                  chatScreenViewModelRef.textEditingController,
+                              cursorColor: brightActionColor,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                              maxLines: 1,
+                              decoration: InputDecoration(
+                                hintText: 'Write Message...',
+                                hintStyle: TextStyle(
+                                  color: Colors.white60,
+                                  fontSize: 16,
+                                ),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: chatScreenViewModelRef.sendMessage,
+                            child: Icon(
+                              Icons.send,
+                              color: brightActionColor,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'This room was closed!!!',
+                            style: TextStyle(
+                              color: Colors.white38,
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: chatScreenViewModelRef
+                                .onSearchAnotherChatButtonTap,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: brightActionColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              'Find New Chat!',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
           ],
         ),
       ),

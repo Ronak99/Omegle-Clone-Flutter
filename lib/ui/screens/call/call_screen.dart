@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/enums/call_search_status.dart';
 import 'package:omegle_clone/provider/video_room_provider.dart';
 import 'package:omegle_clone/ui/screens/call/call_screen_viewmodel.dart';
+import 'package:omegle_clone/ui/widgets/utility_widgets.dart';
 
 class CallScreen extends ConsumerStatefulWidget {
   const CallScreen({Key? key}) : super(key: key);
@@ -74,16 +75,16 @@ class _CallScreenStateState extends ConsumerState<CallScreen> {
                               null) {
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                CircularProgressIndicator(),
+                              children:  [
+                                kDefaultCircularProgressIndicator,
                                 Text('Remote user agora id is null'),
                               ],
                             );
                           } else if (videoRoom == null) {
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                CircularProgressIndicator(),
+                              children:  [
+                                kDefaultCircularProgressIndicator,
                                 Text('Video room was null'),
                               ],
                             );

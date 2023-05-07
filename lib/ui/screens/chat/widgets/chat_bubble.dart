@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:omegle_clone/constants/colors.dart';
 import 'package:omegle_clone/models/message.dart';
 
 class ChatBubble extends StatelessWidget {
@@ -15,19 +16,27 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     bool _isSentByMe = message.sentBy == currentUserId;
 
+    double _radius = 15;
+
     return Align(
       alignment: _isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: _isSentByMe ? Colors.blue[400]! : Colors.grey[300],
+          borderRadius: BorderRadius.only(
+            topLeft: !_isSentByMe ? Radius.zero : Radius.circular(_radius),
+            bottomLeft: Radius.circular(_radius),
+            bottomRight: _isSentByMe ? Radius.zero : Radius.circular(_radius),
+            topRight: Radius.circular(_radius),
+          ),
+          color: _isSentByMe ? brightActionColor : subtleSurfaceColor,
         ),
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        margin: EdgeInsets.only(bottom: 8),
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        margin: EdgeInsets.only(bottom: 12),
         child: Text(
           message.content,
           style: TextStyle(
-            color: _isSentByMe ? Colors.white : Colors.black,
+            color: Colors.white,
+            fontSize: 14,
           ),
         ),
       ),
