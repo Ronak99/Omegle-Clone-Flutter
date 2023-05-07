@@ -68,7 +68,7 @@ class VideoRoomNotifier extends StateNotifier<ChatRoom?> {
       // search user
       String uid = ref.read(userProvider).uid;
 
-      await _randomChatService.searchUserToVideoChat(uid: uid);
+      await _randomChatService.searchUserToVideoCall(uid: uid);
     } on CustomException {
       rethrow;
     }

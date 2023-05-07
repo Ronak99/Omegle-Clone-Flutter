@@ -76,7 +76,7 @@ class ChatRoomNotifier extends StateNotifier<ChatRoom?> {
       if (!forVideoCall) {
         await _randomChatService.searchUserToChat(uid: uid);
       } else {
-        await _randomChatService.searchUserToVideoChat(uid: uid);
+        await _randomChatService.searchUserToVideoCall(uid: uid);
       }
     } on CustomException catch (e) {
       print(e);
