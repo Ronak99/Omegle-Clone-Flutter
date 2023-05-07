@@ -10,10 +10,10 @@ import 'package:omegle_clone/provider/engagement_provider.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
 
 var chatListViewModel =
-    StateNotifierProvider.autoDispose<ChatListViewModel, List<Message>>(
+    StateNotifierProvider.autoDispose<ChatListViewModel, ChatListState>(
         (ref) => ChatListViewModel(ref));
 
-class ChatListViewModel extends StateNotifier<List<Message>> {
+class ChatListViewModel extends StateNotifier<ChatListState> {
   StateNotifierProviderRef ref;
 
   // Services
@@ -23,7 +23,7 @@ class ChatListViewModel extends StateNotifier<List<Message>> {
   StreamSubscription<QuerySnapshot<Message>>? _messageSubscription;
 
 // Constructor
-  ChatListViewModel(this.ref) : super([]) {
+  ChatListViewModel(this.ref) : super(ChatListState(messages: [])) {
     init();
   }
 
@@ -36,12 +36,14 @@ class ChatListViewModel extends StateNotifier<List<Message>> {
     _messageSubscription = _randomChatService
         .queryRoomChat(roomId: roomId)
         .listen((messageListQuery) {
-      state = messageListQuery.docs.map((e) => e.data()).toList();
+      state = state.copyWith(
+          roomId: roomId,
+          messages: messageListQuery.docs.map((e) => e.data()).toList());
     });
   }
 
   reset({bool shouldClearMessageList = false}) async {
-      state = [];
+    state = ChatListState(roomId: null);
     await _messageSubscription?.cancel();
   }
 
@@ -49,5 +51,24 @@ class ChatListViewModel extends StateNotifier<List<Message>> {
   void dispose() {
     reset();
     super.dispose();
+  }
+}
+
+class ChatListState {
+  List<Message> messages;
+  String? roomId;
+  ChatListState({
+    this.messages = const [],
+    this.roomId,
+  });
+
+  ChatListState copyWith({
+    List<Message>? messages,
+    String? roomId,
+  }) {
+    return ChatListState(
+      messages: messages ?? this.messages,
+      roomId: roomId ?? this.roomId,
+    );
   }
 }
