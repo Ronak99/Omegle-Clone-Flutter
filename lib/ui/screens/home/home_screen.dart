@@ -28,12 +28,26 @@ class HomeScreen extends HookConsumerWidget {
               ChatViewPage(),
             ],
           ),
+          Container(
+            margin: EdgeInsets.only(top: getHomePageBannerHeight(context) - 50),
+            padding: EdgeInsets.symmetric(horizontal: 25),
+            height: 50,
+            alignment: Alignment.center,
+            child: Text(
+              'Welcome!',
+              style: TextStyle(
+                color: Color(0xff414141),
+                fontWeight: FontWeight.w800,
+                fontSize: 35,
+              ),
+            ),
+          ),
           IgnorePointer(
             ignoring: true,
             child: Opacity(
               opacity: 1 - homeScreenState.viewPage,
               child: SizedBox(
-                height: gethomePageBannerHeight(context),
+                height: getHomePageBannerHeight(context),
                 child: SvgPicture.asset("images/call_view_banner.svg"),
               ),
             ),
@@ -43,7 +57,7 @@ class HomeScreen extends HookConsumerWidget {
             child: Opacity(
               opacity: homeScreenState.viewPage,
               child: SizedBox(
-                height: gethomePageBannerHeight(context),
+                height: getHomePageBannerHeight(context),
                 child: SvgPicture.asset("images/chat_view_banner.svg"),
               ),
             ),
@@ -51,7 +65,8 @@ class HomeScreen extends HookConsumerWidget {
           ActionButton(
             viewPage: homeScreenState.viewPage,
             isBusy: homeScreenState.isBusy,
-            onPressed: homeScreenViewModelRef.onActionButtonTap,
+            onActiveButtonTap: homeScreenViewModelRef.onActionButtonTap,
+            onInactiveButtonTap: homeScreenViewModelRef.onInactiveButtonTap,
           ),
         ],
       ),
