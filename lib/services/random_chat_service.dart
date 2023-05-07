@@ -1,8 +1,6 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:omegle_clone/enums/chat_room_type.dart';
-import 'package:omegle_clone/enums/engagement_type.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/engagement.dart';
 import 'package:omegle_clone/models/message.dart';
@@ -23,17 +21,16 @@ class RandomChatService {
     }
   }
 
-  Future<void> searchUserToChat({required String uid}) async {
+  Future<void> search(
+      {required String uid, required String engagementType,}) async {
     try {
-      const _engagementType = EngagementType.chat;
-
       // let the users mark themselves free
       await _engagementService.markUserFree(uid: uid);
 
       int _searchStartTs =
           await _engagementService.setEngagementStatusToSearching(
         uid,
-        engagementType: _engagementType,
+        engagementType: engagementType,
       );
 
       // query all the free users
@@ -50,7 +47,7 @@ class RandomChatService {
 
         _listOfPotentialUsers = await _engagementService.queryPotentialUsers(
           idToExclude: uid,
-          engagementType: _engagementType,
+          engagementType: engagementType,
         );
         if (_listOfPotentialUsers.isNotEmpty) {
           break;
@@ -60,7 +57,6 @@ class RandomChatService {
       _checkIfShouldKeepGoing();
 
       if (_listOfPotentialUsers.isEmpty) {
-        await _engagementService.markUserFree(uid: uid);
         throw CustomException("No active users found");
       }
 
@@ -79,8 +75,10 @@ class RandomChatService {
 
           Engagement _pickedUserEngagement = engagementDoc.data()!;
 
-          if (_pickedUserEngagement.isBusy) {
-            await _engagementService.markUserFree(uid: uid);
+          // There is a possibility that some user reaches this point, when they were already connected with me
+          // So we need to ensure that picked user is actually connected with me
+          if (_pickedUserEngagement.isBusy &&
+              _pickedUserEngagement.connectedWith != uid) {
             throw CustomException("No active users found");
           }
 
@@ -93,7 +91,7 @@ class RandomChatService {
               joineeId: _pickedUserId,
               roomId: _roomId,
               isEngaged: true,
-              type: 'chat',
+              type: engagementType,
             );
 
             // if user is un-authenticated
@@ -117,111 +115,112 @@ class RandomChatService {
         maxAttempts: 2,
       );
     } on CustomException {
-      rethrow;
-    }
-  }
-
-  Future<void> searchUserToVideoCall({required String uid}) async {
-    try {
-      const _engagementType = EngagementType.video;
-
-      // let the users mark themselves free
       await _engagementService.markUserFree(uid: uid);
-
-      int _searchStartTs =
-          await _engagementService.setEngagementStatusToSearching(
-        uid,
-        engagementType: _engagementType,
-      );
-
-      _checkIfShouldKeepGoing();
-
-      // query all the free users
-      List<String> _listOfPotentialUsers = [];
-
-      // Check for potential users every 3 seconds for 3 times. Keeping the users in searching state for 9 seconds
-      // in worst case scenario
-      for (int i = 0; i < 3; i++) {
-        _checkIfShouldKeepGoing();
-
-        await Future.delayed(Duration(seconds: 3));
-
-        _listOfPotentialUsers = await _engagementService.queryPotentialUsers(
-          idToExclude: uid,
-          engagementType: _engagementType,
-        );
-        if (_listOfPotentialUsers.isNotEmpty) {
-          break;
-        }
-      }
-
-      _checkIfShouldKeepGoing();
-
-      if (_listOfPotentialUsers.isEmpty) {
-        await _engagementService.markUserFree(uid: uid);
-        throw CustomException("No active users found", code: 'no_user_found');
-      }
-
-      // pick a user at random
-      String _pickedUserId =
-          Utils.pickRandomValueFromList(_listOfPotentialUsers);
-
-      // Race Conditions: having same pickedUserId
-      FirebaseFirestore.instance.runTransaction(
-        (transaction) async {
-          // Check if the pickedUser has been marked busy
-          // If they are marked busy, then query their room id, and store it in a data set
-          Engagement _pickedUserEngagement =
-              await _engagementService.queryEngagementRecord(
-            uid: _pickedUserId,
-            transaction: transaction,
-          );
-
-          if (_pickedUserEngagement.isBusy) {
-            await _engagementService.markUserFree(uid: uid);
-            throw CustomException("No active users found");
-          }
-
-          if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
-            // Generate a room id
-            String _roomId = Utils.generateRandomId();
-
-            ChatRoom _chatRoom = ChatRoom(
-              creatorId: uid,
-              joineeId: _pickedUserId,
-              roomId: _roomId,
-              isEngaged: true,
-              type: ChatRoomType.video,
-            );
-
-            // if user is un-authenticated
-            // create chat room
-            await createChatRoom(
-              chatRoom: _chatRoom,
-              transaction: transaction,
-            );
-
-            // If they are not marked busy, then mark them busy, with chat room
-            // mark both the users busy
-            _engagementService.connectUsersViaTransaction(
-              uid: uid,
-              roomId: _roomId,
-              connectedWith: _pickedUserId,
-              transaction: transaction,
-            );
-            return;
-          }
-        },
-        maxAttempts: 2,
-      );
-      // if user is authenticated
-      // check if the picked user is a friend
-      // if they are, make them join the same room
-      // else create chat room
-    } on CustomException {
       rethrow;
     }
   }
+
+  // Future<void> searchUserToVideoCall({required String uid}) async {
+  //   try {
+  //     const _engagementType = EngagementType.video;
+
+  //     // let the users mark themselves free
+  //     await _engagementService.markUserFree(uid: uid);
+
+  //     int _searchStartTs =
+  //         await _engagementService.setEngagementStatusToSearching(
+  //       uid,
+  //       engagementType: _engagementType,
+  //     );
+
+  //     _checkIfShouldKeepGoing();
+
+  //     // query all the free users
+  //     List<String> _listOfPotentialUsers = [];
+
+  //     // Check for potential users every 3 seconds for 3 times. Keeping the users in searching state for 9 seconds
+  //     // in worst case scenario
+  //     for (int i = 0; i < 3; i++) {
+  //       _checkIfShouldKeepGoing();
+
+  //       await Future.delayed(Duration(seconds: 3));
+
+  //       _listOfPotentialUsers = await _engagementService.queryPotentialUsers(
+  //         idToExclude: uid,
+  //         engagementType: _engagementType,
+  //       );
+  //       if (_listOfPotentialUsers.isNotEmpty) {
+  //         break;
+  //       }
+  //     }
+
+  //     _checkIfShouldKeepGoing();
+
+  //     if (_listOfPotentialUsers.isEmpty) {
+  //       await _engagementService.markUserFree(uid: uid);
+  //       throw CustomException("No active users found", code: 'no_user_found');
+  //     }
+
+  //     // pick a user at random
+  //     String _pickedUserId =
+  //         Utils.pickRandomValueFromList(_listOfPotentialUsers);
+
+  //     // Race Conditions: having same pickedUserId
+  //     FirebaseFirestore.instance.runTransaction(
+  //       (transaction) async {
+  //         // Check if the pickedUser has been marked busy
+  //         // If they are marked busy, then query their room id, and store it in a data set
+  //         Engagement _pickedUserEngagement =
+  //             await _engagementService.queryEngagementRecord(
+  //           uid: _pickedUserId,
+  //           transaction: transaction,
+  //         );
+
+  //         if (_pickedUserEngagement.isBusy) {
+  //           await _engagementService.markUserFree(uid: uid);
+  //           throw CustomException("No active users found");
+  //         }
+
+  //         if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
+  //           // Generate a room id
+  //           String _roomId = Utils.generateRandomId();
+
+  //           ChatRoom _chatRoom = ChatRoom(
+  //             creatorId: uid,
+  //             joineeId: _pickedUserId,
+  //             roomId: _roomId,
+  //             isEngaged: true,
+  //             type: ChatRoomType.video,
+  //           );
+
+  //           // if user is un-authenticated
+  //           // create chat room
+  //           await createChatRoom(
+  //             chatRoom: _chatRoom,
+  //             transaction: transaction,
+  //           );
+
+  //           // If they are not marked busy, then mark them busy, with chat room
+  //           // mark both the users busy
+  //           _engagementService.connectUsersViaTransaction(
+  //             uid: uid,
+  //             roomId: _roomId,
+  //             connectedWith: _pickedUserId,
+  //             transaction: transaction,
+  //           );
+  //           return;
+  //         }
+  //       },
+  //       maxAttempts: 2,
+  //     );
+  //     // if user is authenticated
+  //     // check if the picked user is a friend
+  //     // if they are, make them join the same room
+  //     // else create chat room
+  //   } on CustomException {
+  //     rethrow;
+  //   }
+  // }
 
   createChatRoom({
     required ChatRoom chatRoom,

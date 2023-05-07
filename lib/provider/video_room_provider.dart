@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/enums/engagement_type.dart';
 
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/provider/engagement_provider.dart';
@@ -67,8 +68,7 @@ class VideoRoomNotifier extends StateNotifier<ChatRoom?> {
     try {
       // search user
       String uid = ref.read(userProvider).uid;
-
-      await _randomChatService.searchUserToVideoCall(uid: uid);
+      await _randomChatService.search(uid: uid, engagementType: EngagementType.video);
     } on CustomException {
       rethrow;
     }
