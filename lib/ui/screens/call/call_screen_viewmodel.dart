@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/api/agora_api.dart';
 import 'package:omegle_clone/constants/agora_config.dart';
@@ -10,6 +11,7 @@ import 'package:omegle_clone/provider/user_provider.dart';
 
 import 'package:omegle_clone/provider/video_room_provider.dart';
 import 'package:omegle_clone/states/back_button_data.dart';
+import 'package:omegle_clone/ui/screens/call/controls/call_control_state_provider.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
@@ -28,6 +30,9 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
   RtcEngine? _engine;
   String? _joinedChannelId;
 
+  late AnimationController animationController;
+  late Animation<double> animation;
+
 // Constructor
   CallScreenViewModel(this.ref) : super(CallScreenState()) {
     _init();
@@ -38,7 +43,12 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
     _searchRandomUser();
   }
 
+  onScreenTap() {
+    ref.read(callControlStateProvider.notifier).toggleAnimation();
+  }
+
   onSearchAgain() async {
+    ref.read(callControlStateProvider.notifier).moveTickerForward();
     _init();
   }
 
@@ -50,10 +60,17 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
 
       _engine = null;
       state = CallScreenState();
+
+      _initializeEventListeners();
+
+      await _engine!.enableVideo();
+      await _engine!.startPreview();
+      await _engine!.adjustPlaybackSignalVolume(100);
+      await _engine!.setInEarMonitoringVolume(100);
+      state = state.copyWith(engine: _engine);
+
       // return;
-    }
-    print("mino rlog");
-    if (_engine == null) {
+    } else {
       _engine = createAgoraRtcEngine();
 
       await _engine!.initialize(

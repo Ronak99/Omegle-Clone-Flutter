@@ -1,40 +1,31 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:omegle_clone/enums/call_search_status.dart';
 import 'package:omegle_clone/provider/video_room_provider.dart';
 import 'package:omegle_clone/ui/screens/call/call_screen_viewmodel.dart';
+import 'package:omegle_clone/ui/screens/call/controls/call_control_view.dart';
 import 'package:omegle_clone/ui/widgets/utility_widgets.dart';
 
-class CallScreen extends ConsumerStatefulWidget {
+class CallScreen extends HookConsumerWidget {
   const CallScreen({Key? key}) : super(key: key);
 
   @override
-  _CallScreenStateState createState() => _CallScreenStateState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final callScreenViewModelRef =
+        useState(ref.read(callScreenViewModel.notifier));
 
-class _CallScreenStateState extends ConsumerState<CallScreen> {
-  late CallScreenViewModel callScreenViewModelRef;
+    useEffect(() {
+      callScreenViewModelRef.value = ref.read(callScreenViewModel.notifier);
+      return () => callScreenViewModelRef.value.disposeProvider();
+    }, []);
 
-  @override
-  void initState() {
-    super.initState();
-    callScreenViewModelRef = ref.read(callScreenViewModel.notifier);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    callScreenViewModelRef.disposeProvider();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     var videoRoom = ref.watch(videoRoomProvider);
     var callScreenState = ref.watch(callScreenViewModel);
 
     return WillPopScope(
-      onWillPop: callScreenViewModelRef.onWillPop,
+      onWillPop: callScreenViewModelRef.value.onWillPop,
       child: Scaffold(
         body: Builder(
           builder: (context) {
@@ -51,84 +42,97 @@ class _CallScreenStateState extends ConsumerState<CallScreen> {
                     child: Text(videoRoom?.roomId ?? 'No Room ID'),
                   ),
                 ),
-                Column(
-                  children: [
-                    Expanded(
-                      child: Builder(
-                        builder: (context) {
-                          if (callScreenState.callSearchStatus ==
-                              CallSearchStatus.foundNoUsers) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('No users found at this moment'),
-                                SizedBox(height: 15),
-                                TextButton(
-                                  child: Text('Try Again!'),
-                                  onPressed: () {
-                                    callScreenViewModelRef.onSearchAgain();
-                                  },
-                                ),
-                              ],
-                            );
-                          } else if (callScreenState.remoteUserAgoraId ==
-                              null) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children:  [
-                                kDefaultCircularProgressIndicator,
-                                Text('Remote user agora id is null'),
-                              ],
-                            );
-                          } else if (videoRoom == null) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children:  [
-                                kDefaultCircularProgressIndicator,
-                                Text('Video room was null'),
-                              ],
-                            );
-                          } else {
-                            return AgoraVideoView(
-                              controller: VideoViewController.remote(
-                                rtcEngine: callScreenState.engine!,
-                                canvas: VideoCanvas(
-                                  uid: callScreenState.remoteUserAgoraId,
-                                ),
-                                connection:
-                                    RtcConnection(channelId: videoRoom.roomId),
-                                useAndroidSurfaceView: true,
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: AgoraVideoView(
-                        controller: VideoViewController(
-                          rtcEngine: callScreenState.engine!,
-                          canvas: VideoCanvas(
-                            uid: 0,
+                GestureDetector(
+                  onTap: callScreenViewModelRef.value.onScreenTap,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          color: Colors.transparent,
+                          child: Builder(
+                            builder: (context) {
+                              if (callScreenState.callSearchStatus ==
+                                  CallSearchStatus.foundNoUsers) {
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('No users found at this moment'),
+                                    SizedBox(height: 15),
+                                    TextButton(
+                                      child: Text('Try Again!'),
+                                      onPressed: () {
+                                        callScreenViewModelRef.value
+                                            .onSearchAgain();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              } else if (callScreenState.remoteUserAgoraId ==
+                                  null) {
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    kDefaultCircularProgressIndicator,
+                                    Text('Remote user agora id is null'),
+                                  ],
+                                );
+                              } else if (videoRoom == null) {
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    kDefaultCircularProgressIndicator,
+                                    Text('Video room was null'),
+                                  ],
+                                );
+                              } else {
+                                return AgoraVideoView(
+                                  controller: VideoViewController.remote(
+                                    rtcEngine: callScreenState.engine!,
+                                    canvas: VideoCanvas(
+                                      uid: callScreenState.remoteUserAgoraId,
+                                    ),
+                                    connection: RtcConnection(
+                                        channelId: videoRoom.roomId),
+                                    useAndroidSurfaceView: true,
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ),
-                        onAgoraVideoViewCreated: (viewId) {
-                          callScreenState.engine!.startPreview();
-                        },
                       ),
-                    ),
-                  ],
-                ),
-                // if (callScreenState.localUserAgoraId != null)
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: SecondaryActionButton(
-                    text:
-                        "Local UID: ${callScreenState.localUserAgoraId} | Channel: ${callScreenState.joinedChannelId}",
-                    onPressed: () {
-                      callScreenViewModelRef.onSearchAgain();
-                    },
+                      Expanded(
+                        child: AgoraVideoView(
+                          controller: VideoViewController(
+                            rtcEngine: callScreenState.engine!,
+                            canvas: VideoCanvas(
+                              uid: 0,
+                            ),
+                          ),
+                          onAgoraVideoViewCreated: (viewId) {
+                            callScreenState.engine!.startPreview();
+                          },
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    margin: EdgeInsets.only(top: 80),
+                    child: SecondaryActionButton(
+                      text:
+                          "Local UID: ${callScreenState.localUserAgoraId} | Channel: ${callScreenState.joinedChannelId}",
+                      onPressed: () {
+                        callScreenViewModelRef.value.onSearchAgain();
+                      },
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: CallControlView(),
                 ),
               ],
             );
