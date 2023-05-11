@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/theme/app_theme.dart';
 import 'package:omegle_clone/ui/screens/home/home_screen.dart';
 import 'package:omegle_clone/utils/utils.dart';
 import 'package:one_context/one_context.dart';
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       builder: OneContext().builder,
       navigatorKey: OneContext().key,
+      theme: AppTheme().darkTheme,
       home: Scaffold(
         body: Center(
           child: TextButton(
