@@ -3,8 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
-import 'package:omegle_clone/ui/screens/call/agora_v5.2.0/call_screen.dart';
-import 'package:omegle_clone/utils/utils.dart';
+import 'package:omegle_clone/ui/screens/auth/dialogs/authentication_dialog.dart';
 
 var homeScreenViewModel =
     StateNotifierProvider<HomeScreenViewModel, HomeScreenState>(
@@ -31,7 +30,8 @@ class HomeScreenViewModel extends StateNotifier<HomeScreenState> {
 
     // search
     if (state.isVideoPageActive) {
-      Utils.navigateTo(CallScreen());
+      AuthenticationDialog.show();
+      // Utils.navigateTo(CallScreen());
     } else {
       state = state.copyWith(isBusy: true);
       await ref
