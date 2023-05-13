@@ -8,7 +8,7 @@ import 'package:omegle_clone/ui/screens/home/pages/call_view_page.dart';
 import 'package:omegle_clone/ui/screens/home/pages/chat_view_page.dart';
 import 'package:omegle_clone/ui/screens/home/viewmodel/home_screen_viewmodel.dart';
 import 'package:omegle_clone/ui/screens/home/widgets/action_button.dart';
-import 'package:omegle_clone/ui/widgets/user_avatar/user_avatar_widget.dart';
+import 'package:omegle_clone/ui/widgets/handle/handle_widget.dart';
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -38,8 +38,8 @@ class HomeScreen extends HookConsumerWidget {
             child: Text(
               'Welcome!',
               style: Theme.of(context).textTheme.headline4!.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
           IgnorePointer(
@@ -73,24 +73,8 @@ class HomeScreen extends HookConsumerWidget {
             onInactiveButtonTap: homeScreenViewModelRef.onInactiveButtonTap,
           ),
           Align(
-            alignment: Alignment.topRight,
-            child: UserAvatar(),
-          ),
-          Align(
             alignment: Alignment.centerRight,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.horizontal(
-                  left: Radius.circular(6),
-                ),
-                color: brightActionColor,
-              ),
-              height: 70,
-              width: 40,
-              alignment: Alignment.center,
-              padding: EdgeInsets.only(left: 6),
-              child: Icon(Icons.people),
-            ),
+            child: HandleWidget(),
           ),
         ],
       ),
