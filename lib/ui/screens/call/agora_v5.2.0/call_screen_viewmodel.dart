@@ -11,6 +11,7 @@ import 'package:omegle_clone/provider/user_provider.dart';
 
 import 'package:omegle_clone/provider/video_room_provider.dart';
 import 'package:omegle_clone/states/back_button_data.dart';
+import 'package:omegle_clone/ui/screens/call/controls/call_control_state_provider.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
@@ -42,12 +43,7 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
     _searchRandomUser();
   }
 
-  // onScreenTap() {
-  //   ref.read(callControlStateProvider.notifier).toggleAnimation();
-  // }
-
   onSearchAgain() async {
-    // ref.read(callControlStateProvider.notifier).moveTickerForward();
     _init();
   }
 
@@ -68,7 +64,6 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
       _engine!.startPreview();
       _engine!.adjustPlaybackSignalVolume(100);
       _engine!.setInEarMonitoringVolume(100);
-      _engine!.muteLocalAudioStream(false);
       state = state.copyWith(engine: _engine);
     }
   }
@@ -107,16 +102,15 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
 
   RtcEngineEventHandler get _engineEventHandler => RtcEngineEventHandler(
         joinChannelSuccess: (localUid, elapsed, _) {
-          // state = state.copyWith(
-          //   localUserAgoraId: localUid,
-          //   joinedChannelId: connection.channelId,
-          // );
+          // unmute self
+          ref.read(callControlStateProvider.notifier).showControls();
+
+          ref.read(callControlStateProvider.notifier).unmuteSelf();
         },
         leaveChannel: (stats) {
-          // not being triggered
-          // log("onLeaveChannel triggered for channel id: ${connection.channelId}",
-          //     name: "onLeaveChannel");
-          state = state.clearLocalUidAndChannelId();
+          if(mounted){
+            state = state.clearLocalUidAndChannelId();
+          }
         },
         rtcStats: (stats) => {
           // log("UserCount: for channel id: ${connection.channelId} ${stats.userCount}",
@@ -152,7 +146,7 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
     state = state.copyWith(remoteUserAgoraId: remoteUid);
   }
 
-  Future<bool> onWillPop() async {
+  Future<bool> onBackButtonTap() async {
     ChatRoom? _room = ref.read(videoRoomProvider);
     if (_room == null) {
       return true;
@@ -169,14 +163,17 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
   }
 
   disposeProvider() async {
-    if(mounted){
-      await _engine?.leaveChannel();
+    if (mounted) {
+      try {
+        _engine?.leaveChannel();
+        log("Left Channel", name: 'call_screen_viewmodel');
+        _engine?.destroy();
+        log("Engine Destroyed", name: 'call_screen_viewmodel');
+      } catch (e) {
+        log("Error while disposing provider: $e",
+            name: 'call_screen_viewmodel');
+      }
     }
-    if(mounted){
-      _engine?.destroy();
-    }
-
-    log("Engine Released");
   }
 }
 
