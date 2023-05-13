@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:omegle_clone/constants/colors.dart';
 
 class AppTheme {
@@ -13,6 +14,16 @@ class AppTheme {
         primaryColor: brightActionColor,
         backgroundColor: backgroundColor,
         scaffoldBackgroundColor: backgroundColor,
+        appBarTheme: AppBarTheme(
+          actionsIconTheme: IconThemeData(
+            color: Colors.white,
+          ),
+          systemOverlayStyle: SystemUiOverlayStyle.light,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
         textTheme: const TextTheme(
           headline1: TextStyle(
             fontSize: 24,
