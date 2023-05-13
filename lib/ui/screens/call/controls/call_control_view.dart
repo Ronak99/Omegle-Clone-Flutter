@@ -31,7 +31,8 @@ class CallControlView extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     print('building call control view');
-
+    // reason why useAnimationController hook is initialized outside useEffect is because
+    // type mismatch between hooks error is thrown if useAnimationController is used inside useEffect
     AnimationController _animationController = useAnimationController(
       duration: Duration(milliseconds: 150),
       reverseDuration: Duration(milliseconds: 150),
@@ -45,34 +46,37 @@ class CallControlView extends HookConsumerWidget {
       return null;
     }, []);
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 25),
-      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: Colors.black38,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _controlButton(
-            icon: CupertinoIcons.mic,
-            label: 'Mute',
-            onTap: () {},
-          ),
-          SizedBox(
-            height: 25,
-            child: VerticalDivider(
-              width: 15,
-              thickness: 1.5,
+    return Opacity(
+      opacity: ref.watch(callControlStateProvider).tickerValue,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 25),
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.black38,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _controlButton(
+              icon: CupertinoIcons.mic,
+              label: 'Mute',
+              onTap: () {},
             ),
-          ),
-          _controlButton(
-            icon: CupertinoIcons.shuffle,
-            label: 'Skip',
-            onTap: () {},
-          ),
-        ],
+            SizedBox(
+              height: 25,
+              child: VerticalDivider(
+                width: 15,
+                thickness: 1.5,
+              ),
+            ),
+            _controlButton(
+              icon: CupertinoIcons.shuffle,
+              label: 'Skip',
+              onTap: () {},
+            ),
+          ],
+        ),
       ),
     );
   }
