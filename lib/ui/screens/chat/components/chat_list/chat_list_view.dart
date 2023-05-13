@@ -47,7 +47,7 @@ class ChatListView extends HookConsumerWidget {
               children: [
                 SizedBox(
                   height: MediaQuery.of(context).size.width * .6,
-                  child: SvgPicture.asset('images/chat_screen_mascot.svg'),
+                  child: SvgPicture.asset('images/chat_screen_room_joined.svg'),
                 ),
                 Text(
                   'Hooray!',
@@ -80,8 +80,8 @@ class ChatListView extends HookConsumerWidget {
           opacity: isEngaged ? 1 : .5,
           child: Column(
             children: [
-              Text("Room ID: ${chatListState.roomId}"),
-              SizedBox(height: 25),
+              // Text("Room ID: ${chatListState.roomId}"),
+              // SizedBox(height: 25),
               Expanded(
                 child: ListView.builder(
                   itemCount: chatListState.messages.length,
@@ -113,7 +113,7 @@ class ChatListView extends HookConsumerWidget {
                     SizedBox(
                       height: MediaQuery.of(context).size.width * .6,
                       child: SvgPicture.asset(
-                          'images/chat_room_closed_mascot.svg'),
+                          'images/chat_screen_room_closed.svg'),
                     ),
                     Text(
                       'Room Closed!',
