@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
-import 'package:omegle_clone/services/random_chat_service.dart';
 import 'package:omegle_clone/ui/screens/call/agora_v5.2.0/call_screen.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
@@ -15,9 +14,6 @@ class HomeScreenViewModel extends StateNotifier<HomeScreenState> {
   StateNotifierProviderRef ref;
 
   PageController pageController = PageController();
-
-  // Services
-  final RandomChatService _randomChatService = RandomChatService();
 
   HomeScreenViewModel(this.ref) : super(HomeScreenState()) {
     pageController.addListener(_pageControllerListener);
