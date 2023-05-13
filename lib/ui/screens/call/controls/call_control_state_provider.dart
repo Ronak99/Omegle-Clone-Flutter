@@ -40,6 +40,10 @@ class CallControlStateProvider extends StateNotifier<CallControlState> {
     }
   }
 
+  showControls() {
+    moveTickerForward();
+  }
+
   toggleMute() async {
     if (state.isMuted) {
       await ref.read(callScreenViewModel.notifier).unmuteSelf();
@@ -49,12 +53,35 @@ class CallControlStateProvider extends StateNotifier<CallControlState> {
     state = state.copyWith(isMuted: !state.isMuted);
   }
 
-  moveTickerForward() => _animationController!.forward();
+  unmuteSelf() async {
+    if (state.isMuted) {
+      await ref.read(callScreenViewModel.notifier).unmuteSelf();
+    }
+    state = state.copyWith(isMuted: false);
+  }
 
-  moveTickerBackward() => _animationController!.reverse();
+  moveTickerForward() {
+    try {
+      _animationController!.forward();
+    } catch (e) {
+      print('moveTickerForward Error: $e');
+    }
+  }
 
-  searchNext() {
+  moveTickerBackward() {
+    try {
+      _animationController!.reverse();
+    } catch (e) {
+      print('moveTickerBackward Error: $e');
+    }
+  }
+
+  onSkipButtonTap() {
     ref.read(callScreenViewModel.notifier).onSearchAgain();
+  }
+
+  onLeaveRoomButtonTap(){
+    ref.read(callScreenViewModel.notifier).onBackButtonTap();
   }
 
   @override
