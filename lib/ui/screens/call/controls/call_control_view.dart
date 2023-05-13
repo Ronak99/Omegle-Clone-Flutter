@@ -11,6 +11,7 @@ class CallControlView extends HookConsumerWidget {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    Color? color,
   }) {
     return Expanded(
       child: GestureDetector(
@@ -20,9 +21,12 @@ class CallControlView extends HookConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon),
+              Icon(icon, color: color),
               SizedBox(height: 5),
-              Text(label),
+              Text(
+                label,
+                style: TextStyle(color: color),
+              ),
             ],
           ),
         ),
@@ -57,7 +61,7 @@ class CallControlView extends HookConsumerWidget {
         child: Container(
           margin: EdgeInsets.only(bottom: 25),
           padding: EdgeInsets.symmetric(vertical: 15),
-          width: 180,
+          width: 250,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             color: Colors.black38,
@@ -82,9 +86,25 @@ class CallControlView extends HookConsumerWidget {
                 ),
               ),
               _controlButton(
+                icon: CupertinoIcons.power,
+                label: 'Leave',
+                color: Colors.red,
+                onTap: ref
+                    .read(callControlStateProvider.notifier)
+                    .onLeaveRoomButtonTap,
+              ),
+              SizedBox(
+                height: 25,
+                child: VerticalDivider(
+                  width: 15,
+                  thickness: 1.5,
+                ),
+              ),
+              _controlButton(
                 icon: CupertinoIcons.shuffle,
                 label: 'Skip',
-                onTap: ref.read(callControlStateProvider.notifier).searchNext,
+                onTap:
+                    ref.read(callControlStateProvider.notifier).onSkipButtonTap,
               ),
             ],
           ),
