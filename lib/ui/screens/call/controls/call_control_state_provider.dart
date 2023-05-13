@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/ui/screens/call/agora_v5.2.0/call_screen_viewmodel.dart';
 
 var callControlStateProvider = StateNotifierProvider.autoDispose<
     CallControlStateProvider,
@@ -39,9 +40,22 @@ class CallControlStateProvider extends StateNotifier<CallControlState> {
     }
   }
 
+  toggleMute() async {
+    if (state.isMuted) {
+      await ref.read(callScreenViewModel.notifier).unmuteSelf();
+    } else {
+      await ref.read(callScreenViewModel.notifier).muteSelf();
+    }
+    state = state.copyWith(isMuted: !state.isMuted);
+  }
+
   moveTickerForward() => _animationController!.forward();
 
   moveTickerBackward() => _animationController!.reverse();
+
+  searchNext() {
+    ref.read(callScreenViewModel.notifier).onSearchAgain();
+  }
 
   @override
   void dispose() {

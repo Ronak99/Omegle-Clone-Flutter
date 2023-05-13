@@ -12,17 +12,19 @@ class CallControlView extends HookConsumerWidget {
     required String label,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 15),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon),
-            SizedBox(height: 5),
-            Text(label),
-          ],
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon),
+              SizedBox(height: 5),
+              Text(label),
+            ],
+          ),
         ),
       ),
     );
@@ -38,9 +40,11 @@ class CallControlView extends HookConsumerWidget {
       reverseDuration: Duration(milliseconds: 150),
     );
 
+    var callControlStateProviderRef =
+        ref.read(callControlStateProvider.notifier);
+
     useEffect(() {
-      ref
-          .read(callControlStateProvider.notifier)
+      callControlStateProviderRef
           .initializeAnimationController(_animationController);
 
       return null;
@@ -48,34 +52,42 @@ class CallControlView extends HookConsumerWidget {
 
     return Opacity(
       opacity: ref.watch(callControlStateProvider).tickerValue,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 25),
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: Colors.black38,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _controlButton(
-              icon: CupertinoIcons.mic,
-              label: 'Mute',
-              onTap: () {},
-            ),
-            SizedBox(
-              height: 25,
-              child: VerticalDivider(
-                width: 15,
-                thickness: 1.5,
+      child: Transform.scale(
+        scale: ref.watch(callControlStateProvider).tickerValue,
+        child: Container(
+          margin: EdgeInsets.only(bottom: 25),
+          padding: EdgeInsets.symmetric(vertical: 15),
+          width: 180,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            color: Colors.black38,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _controlButton(
+                icon: ref.watch(callControlStateProvider).isMuted
+                    ? CupertinoIcons.mic_off
+                    : CupertinoIcons.mic,
+                label: ref.watch(callControlStateProvider).isMuted
+                    ? 'Unmute'
+                    : 'Mute',
+                onTap: callControlStateProviderRef.toggleMute,
               ),
-            ),
-            _controlButton(
-              icon: CupertinoIcons.shuffle,
-              label: 'Skip',
-              onTap: () {},
-            ),
-          ],
+              SizedBox(
+                height: 25,
+                child: VerticalDivider(
+                  width: 15,
+                  thickness: 1.5,
+                ),
+              ),
+              _controlButton(
+                icon: CupertinoIcons.shuffle,
+                label: 'Skip',
+                onTap: ref.read(callControlStateProvider.notifier).searchNext,
+              ),
+            ],
+          ),
         ),
       ),
     );

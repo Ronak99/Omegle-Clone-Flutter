@@ -68,6 +68,7 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
       _engine!.startPreview();
       _engine!.adjustPlaybackSignalVolume(100);
       _engine!.setInEarMonitoringVolume(100);
+      _engine!.muteLocalAudioStream(false);
       state = state.copyWith(engine: _engine);
     }
   }
@@ -133,6 +134,14 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
 
   _initializeEventListeners() {
     _engine?.setEventHandler(_engineEventHandler);
+  }
+
+  Future<void> muteSelf() async {
+    await _engine?.muteLocalVideoStream(true);
+  }
+
+  Future<void> unmuteSelf() async {
+    await _engine?.muteLocalAudioStream(false);
   }
 
   _remoteUserJoinedHandler(
