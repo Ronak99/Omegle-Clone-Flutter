@@ -14,6 +14,11 @@ class AppTheme {
         primaryColor: brightActionColor,
         backgroundColor: backgroundColor,
         scaffoldBackgroundColor: backgroundColor,
+        snackBarTheme: SnackBarThemeData(
+          contentTextStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
         appBarTheme: AppBarTheme(
           actionsIconTheme: IconThemeData(
             color: Colors.white,
