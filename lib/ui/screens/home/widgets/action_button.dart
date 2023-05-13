@@ -39,15 +39,14 @@ class ActionButton extends ConsumerWidget {
                     ? null
                     : BoxDecoration(
                         border: Border.all(
-                          color: Colors.black26,
+                          color: Colors.white,
                           width: 3,
                         ),
                         shape: BoxShape.circle,
                       ),
                 child: isBusy
                     ? CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.black26),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         strokeWidth: 3,
                       )
                     : SizedBox.shrink(),
@@ -81,6 +80,7 @@ class ActionButton extends ConsumerWidget {
                                 "images/call_icon.png",
                                 height: 50,
                                 width: 50,
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -104,6 +104,7 @@ class ActionButton extends ConsumerWidget {
                                 "images/chat_icon.png",
                                 height: 50,
                                 width: 50,
+                                color: Colors.white,
                               ),
                             ),
                           ),

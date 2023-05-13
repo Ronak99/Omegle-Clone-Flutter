@@ -35,11 +35,7 @@ class HomeScreen extends HookConsumerWidget {
             alignment: Alignment.center,
             child: Text(
               'Welcome!',
-              style: TextStyle(
-                color: Color(0xff414141),
-                fontWeight: FontWeight.w800,
-                fontSize: 35,
-              ),
+              style: Theme.of(context).textTheme.displayLarge,
             ),
           ),
           IgnorePointer(
