@@ -3,11 +3,11 @@ import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import 'package:omegle_clone/enums/call_search_status.dart';
 import 'package:omegle_clone/provider/video_room_provider.dart';
 import 'package:omegle_clone/ui/screens/call/controls/call_control_state_provider.dart';
 import 'package:omegle_clone/ui/screens/call/controls/call_control_view.dart';
-import 'package:omegle_clone/ui/widgets/utility_widgets.dart';
 
 import 'call_screen_viewmodel.dart';
 
@@ -41,13 +41,13 @@ class CallScreen extends HookConsumerWidget {
 
             return Stack(
               children: [
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    margin: EdgeInsets.only(top: 50),
-                    child: Text(videoRoom?.roomId ?? 'No Room ID'),
-                  ),
-                ),
+                // Align(
+                //   alignment: Alignment.topCenter,
+                //   child: Container(
+                //     margin: EdgeInsets.only(top: 50),
+                //     child: Text(videoRoom?.roomId ?? 'No Room ID'),
+                //   ),
+                // ),
                 GestureDetector(
                   onTap: callControllerStateProviderRef.toggleAnimation,
                   child: Column(
@@ -73,29 +73,51 @@ class CallScreen extends HookConsumerWidget {
                                     ),
                                   ],
                                 );
-                              } else if (callScreenState.remoteUserAgoraId ==
-                                  null) {
-                                return Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    kDefaultCircularProgressIndicator,
-                                    Text('Remote user agora id is null'),
-                                  ],
-                                );
-                              } else if (videoRoom == null) {
-                                return Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    kDefaultCircularProgressIndicator,
-                                    Text('Video room was null'),
-                                  ],
-                                );
-                              } else {
+                              } else if (callScreenState.remoteUserAgoraId !=
+                                      null &&
+                                  videoRoom != null) {
                                 return RtcRemoteView.SurfaceView(
                                   uid: callScreenState.remoteUserAgoraId!,
                                   channelId: videoRoom.roomId,
                                 );
+                              } else {
+                                return Container(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text('Looking for a match...'),
+                                      SizedBox(height: 30),
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                .7,
+                                        child: Lottie.asset(
+                                          'animation/video_call_search_animation.json',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
                               }
+
+                              // else if (callScreenState.remoteUserAgoraId ==
+                              //     null) {
+                              //   return Column(
+                              //     mainAxisAlignment: MainAxisAlignment.center,
+                              //     children: [
+                              //       kDefaultCircularProgressIndicator,
+                              //       Text('Remote user agora id is null'),
+                              //     ],
+                              //   );
+                              // } else if (videoRoom == null) {
+                              //   return Column(
+                              //     mainAxisAlignment: MainAxisAlignment.center,
+                              //     children: [
+                              //       kDefaultCircularProgressIndicator,
+                              //       Text('Video room was null'),
+                              //     ],
+                              //   );
+                              // }
                             },
                           ),
                         ),
@@ -104,19 +126,19 @@ class CallScreen extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    margin: EdgeInsets.only(top: 80),
-                    child: SecondaryActionButton(
-                      text:
-                          "Local UID: ${callScreenState.localUserAgoraId} | Channel: ${callScreenState.joinedChannelId}",
-                      onPressed: () {
-                        callScreenViewModelRef.value.onSearchAgain();
-                      },
-                    ),
-                  ),
-                ),
+                // Align(
+                //   alignment: Alignment.topCenter,
+                //   child: Container(
+                //     margin: EdgeInsets.only(top: 80),
+                //     child: SecondaryActionButton(
+                //       text:
+                //           "Local UID: ${callScreenState.localUserAgoraId} | Channel: ${callScreenState.joinedChannelId}",
+                //       onPressed: () {
+                //         callScreenViewModelRef.value.onSearchAgain();
+                //       },
+                //     ),
+                //   ),
+                // ),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: CallControlView(),
