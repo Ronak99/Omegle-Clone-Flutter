@@ -31,21 +31,25 @@ class HomeScreen extends HookConsumerWidget {
             ],
           ),
           Container(
-            margin: EdgeInsets.only(top: getHomePageBannerHeight(context) - 50),
+            margin: EdgeInsets.only(top: getHomePageBannerHeight(context)),
             padding: EdgeInsets.symmetric(horizontal: 25),
             height: 50,
             alignment: Alignment.center,
             child: Text(
               'Welcome!',
-              style: Theme.of(context).textTheme.displayLarge,
+              style: Theme.of(context).textTheme.headline4!.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           IgnorePointer(
             ignoring: true,
             child: Opacity(
               opacity: 1 - homeScreenState.viewPage,
-              child: SizedBox(
+              child: Container(
                 height: getHomePageBannerHeight(context),
+                alignment: Alignment.bottomCenter,
+                padding: EdgeInsets.only(bottom: 30),
                 child: SvgPicture.asset("images/call_view_banner.svg"),
               ),
             ),
@@ -54,8 +58,10 @@ class HomeScreen extends HookConsumerWidget {
             ignoring: true,
             child: Opacity(
               opacity: homeScreenState.viewPage,
-              child: SizedBox(
+              child: Container(
                 height: getHomePageBannerHeight(context),
+                margin: EdgeInsets.symmetric(horizontal: 30),
+                alignment: Alignment.bottomCenter,
                 child: SvgPicture.asset("images/chat_view_banner.svg"),
               ),
             ),

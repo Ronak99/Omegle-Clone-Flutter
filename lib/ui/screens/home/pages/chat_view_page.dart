@@ -12,11 +12,12 @@ class ChatViewPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: getHomePageBannerHeight(context)),
+          SizedBox(height: getHomePageBannerHeight(context) + 50),
           Text(
             'Chat with anyone around the world',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline1,
+            style:
+                Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 18),
           ),
         ],
       ),

@@ -12,11 +12,11 @@ class CallViewPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: getHomePageBannerHeight(context)),
+          SizedBox(height: getHomePageBannerHeight(context) + 50),
           Text(
-            'Randomly video chat with anyone around the world',
+            'Randomly video chat with anyone\naround the world',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline1,
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 18),
           ),
         ],
       ),
