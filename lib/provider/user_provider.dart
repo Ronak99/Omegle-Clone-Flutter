@@ -16,13 +16,13 @@ class UserNotifier extends StateNotifier<BaseUser> {
   }
 
   _init() {
-    if (ref.read(authProvider).isLoggedIn) {
+    if (ref.watch(authProvider).isLoggedIn) {
       state = AuthenticatedUser(
         uid: ref.read(authProvider).user!.uid,
         phoneNumber: ref.read(authProvider).user!.phoneNumber!,
       );
+    }else{
+      state = UnAuthenticatedUser();
     }
   }
-
-  reset() {}
 }
