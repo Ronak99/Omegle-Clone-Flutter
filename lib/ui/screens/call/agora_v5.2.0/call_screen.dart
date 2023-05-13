@@ -31,7 +31,7 @@ class CallScreen extends HookConsumerWidget {
         ref.read(callControlStateProvider.notifier);
 
     return WillPopScope(
-      onWillPop: callScreenViewModelRef.value.onWillPop,
+      onWillPop: callScreenViewModelRef.value.onBackButtonTap,
       child: Scaffold(
         body: Builder(
           builder: (context) {
