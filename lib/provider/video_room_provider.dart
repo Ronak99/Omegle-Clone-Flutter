@@ -11,8 +11,9 @@ import 'package:omegle_clone/provider/engagement_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/services/engagement_service.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
-import 'package:omegle_clone/ui/screens/call/call_screen_viewmodel.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
+import 'package:omegle_clone/ui/screens/call/agora_v5.2.0/call_screen_viewmodel.dart' as agora_5_2_0;
+import 'package:omegle_clone/ui/screens/call/agora_v6.1.1/call_screen_viewmodel.dart' as agora_6_1_1;
 
 var videoRoomProvider =
     StateNotifierProvider.autoDispose<VideoRoomNotifier, ChatRoom?>(
@@ -44,7 +45,7 @@ class VideoRoomNotifier extends StateNotifier<ChatRoom?> {
           .listen((chatRoomDoc) {
         if (chatRoomDoc.exists && chatRoomDoc.data() != null) {
           state = chatRoomDoc.data()!;
-          ref.read(callScreenViewModel.notifier).joinChannel(roomId);
+          ref.read(agora_5_2_0.callScreenViewModel.notifier).joinChannel(roomId);
         }
       });
     }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
-import 'package:omegle_clone/ui/screens/call/call_screen.dart';
+import 'package:omegle_clone/ui/screens/call/agora_v5.2.0/call_screen.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
 var homeScreenViewModel =

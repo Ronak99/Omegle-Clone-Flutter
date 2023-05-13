@@ -1,6 +1,6 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 var callControlStateProvider = StateNotifierProvider.autoDispose<
@@ -17,7 +17,7 @@ class CallControlStateProvider extends StateNotifier<CallControlState> {
   CallControlStateProvider(this.ref) : super(CallControlState());
 
   initializeAnimationController(AnimationController animationController) {
-    _animationController = animationController; 
+    _animationController = animationController;
     _animation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController!, curve: Curves.easeInOut),
     );
@@ -26,7 +26,9 @@ class CallControlStateProvider extends StateNotifier<CallControlState> {
   }
 
   controllerListener() {
-    state = state.copyWith(tickerValue: _animation!.value);
+    if (mounted) {
+      state = state.copyWith(tickerValue: _animation!.value);
+    }
   }
 
   toggleAnimation() {
@@ -44,8 +46,7 @@ class CallControlStateProvider extends StateNotifier<CallControlState> {
   @override
   void dispose() {
     super.dispose();
-    _animationController?.removeListener(controllerListener);
-    _animationController?.dispose();
+    log('call_control_state_provider : disposed');
   }
 }
 
