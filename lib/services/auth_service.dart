@@ -10,18 +10,14 @@ class AuthService {
   /// Notifies about changes to the user's sign-in state (such as sign-in or sign-out).
   Stream<User?> authChanges() => _auth.authStateChanges();
 
-  Future<User> signInWithAuthCredential({
+  Future<UserCredential> signInWithAuthCredential({
     required AuthCredential authCredential,
   }) async {
     try {
       UserCredential _userCredential =
           await _auth.signInWithCredential(authCredential);
 
-      if (_userCredential.user != null) {
-        return _userCredential.user!;
-      }
-
-      throw CustomException("User was null");
+      return _userCredential;
     } on FirebaseAuthException catch (err) {
       throw CustomException(err.message!);
     }

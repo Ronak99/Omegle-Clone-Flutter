@@ -29,6 +29,14 @@ class AppTheme {
           ),
           iconTheme: IconThemeData(color: Colors.white),
         ),
+        inputDecorationTheme: InputDecorationTheme(
+            focusColor: brightActionColor,
+            labelStyle: TextStyle(color: Colors.white70)),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: brightActionColor,
+          selectionHandleColor: brightActionColor,
+          selectionColor: brightActionColor.withOpacity(.5),
+        ),
         colorScheme: ColorScheme.fromSwatch().copyWith(
           secondary: Colors.red,
           brightness: Brightness.dark,

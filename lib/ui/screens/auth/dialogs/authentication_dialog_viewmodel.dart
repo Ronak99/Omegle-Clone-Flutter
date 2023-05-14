@@ -39,21 +39,46 @@ class AuthenticationDialogViewModel
         smsCode: otpCode,
       );
 
-      await _authService.signInWithAuthCredential(
+      UserCredential? _userCredential =
+          await _authService.signInWithAuthCredential(
         authCredential: phoneAuthCredential,
       );
 
+      if (_userCredential.user == null) {
+        throw CustomException('User was null');
+      }
+
+      String _successMessage = 'Welcome back!';
+
+      if (_userCredential.additionalUserInfo!.isNewUser) {
+        _successMessage = 'Welcome Aboard';
+      }
+
+      Utils.successSnackbar(_successMessage);
       AuthenticationDialog.dismiss();
     } on CustomException {
       rethrow;
     }
   }
 
-  onSendOtpButtonTap() {
+  onActionButtonTap() async {
+    if (state.isBusy) return;
+
+    if (state.isShowingPhoneView) {
+      onSendOtpButtonTap();
+    }
+
+    if (!state.isShowingPhoneView) {
+      onVerifyOtpButtonTap();
+    }
+  }
+
+  onSendOtpButtonTap() async {
     if (phoneTextFieldController.text.trim().isEmpty) {
       Utils.errorSnackbar("Phone number cannot be empty");
       return;
     }
+
     try {
       _setBusy();
 
@@ -121,4 +146,6 @@ class AuthenticationDialogState {
       authDialogView: authDialogView ?? this.authDialogView,
     );
   }
+
+  bool get isShowingPhoneView => authDialogView == AuthDialogView.phoneView;
 }
