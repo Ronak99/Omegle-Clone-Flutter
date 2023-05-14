@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/constants/colors.dart';
+import 'package:omegle_clone/constants/numerics.dart';
 import 'package:omegle_clone/models/app_user.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/ui/screens/profile/user_profile_screen.dart';
@@ -20,7 +21,10 @@ class UserAvatar extends ConsumerWidget {
       child: Container(
         height: 50,
         width: 50,
-        margin: EdgeInsets.only(top: 50, right: 8),
+        margin: EdgeInsets.only(
+          top: defaultSafeAreaMarginFromTop,
+          right: defaultSafeAreaMarginFromRight,
+        ),
         child: Stack(
           children: [
             Positioned(
