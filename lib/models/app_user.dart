@@ -1,7 +1,7 @@
 import 'package:omegle_clone/enums/user_type.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
-class BaseUser {
+abstract class BaseUser {
   final String uid;
   final UserType userType;
 
