@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:omegle_clone/constants/colors.dart';
 import 'package:omegle_clone/constants/numerics.dart';
 import 'package:omegle_clone/provider/auth_provider.dart';
 import 'package:omegle_clone/ui/screens/home/pages/call_view_page.dart';
 import 'package:omegle_clone/ui/screens/home/pages/chat_view_page.dart';
 import 'package:omegle_clone/ui/screens/home/viewmodel/home_screen_viewmodel.dart';
 import 'package:omegle_clone/ui/screens/home/widgets/action_button.dart';
-import 'package:omegle_clone/ui/widgets/handle/handle_widget.dart';
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -71,10 +69,6 @@ class HomeScreen extends HookConsumerWidget {
             isBusy: homeScreenState.isBusy,
             onActiveButtonTap: homeScreenViewModelRef.onActionButtonTap,
             onInactiveButtonTap: homeScreenViewModelRef.onInactiveButtonTap,
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: HandleWidget(),
           ),
         ],
       ),

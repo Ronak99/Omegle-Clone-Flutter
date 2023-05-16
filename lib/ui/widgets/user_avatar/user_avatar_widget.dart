@@ -21,10 +21,6 @@ class UserAvatar extends ConsumerWidget {
       child: Container(
         height: 50,
         width: 50,
-        margin: EdgeInsets.only(
-          top: defaultSafeAreaMarginFromTop,
-          right: defaultSafeAreaMarginFromRight,
-        ),
         child: Stack(
           children: [
             Positioned(

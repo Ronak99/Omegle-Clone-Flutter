@@ -8,9 +8,7 @@ class PeopleScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Stack(
-      children: [
-        Padding(
+    return Padding(
           padding: EdgeInsets.only(left: defaultSafeAreaMarginFromLeft),
           child: Column(
             children: [
@@ -23,12 +21,6 @@ class PeopleScreen extends ConsumerWidget {
               )
             ],
           ),
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: HandleWidget(),
-        ),
-      ],
-    );
+        );
   }
 }
