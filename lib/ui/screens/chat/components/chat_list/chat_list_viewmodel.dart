@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/provider/engagement_provider.dart';
+import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
 
 var chatListViewModel =
@@ -42,9 +43,38 @@ class ChatListViewModel extends StateNotifier<ChatListState> {
     });
   }
 
+  transferMessageOwnership() {
+    String roomId = ref.read(engagementProvider).roomId!;
+    String previousUserId = ref.read(userProvider).previousUser!.uid;
+    String currentUserId = ref.read(userProvider).currentUser.uid;
+
+    List<Message> messageList =
+        state.messages.where((e) => e.isSentBy(previousUserId)).toList();
+
+    for (var msg in messageList) {
+      msg.sentBy = currentUserId;
+    }
+
+    state = state.copyWith(messages: messageList);
+
+    // get messages sent by previous user
+    _randomChatService.transferMessageOwnership(
+      roomId: roomId,
+      messageList: messageList,
+    );
+  }
+
   reset({bool shouldClearMessageList = false}) async {
     state = ChatListState(roomId: null);
     await _messageSubscription?.cancel();
+  }
+
+  setBusy(){
+    state = state.copyWith(isBusy: true);
+  }
+
+  setFree(){
+    state = state.copyWith(isBusy: false);
   }
 
   @override
@@ -57,18 +87,22 @@ class ChatListViewModel extends StateNotifier<ChatListState> {
 class ChatListState {
   List<Message> messages;
   String? roomId;
+  bool isBusy = false;
   ChatListState({
     this.messages = const [],
     this.roomId,
+    this.isBusy = false,
   });
 
   ChatListState copyWith({
     List<Message>? messages,
     String? roomId,
+    bool? isBusy,
   }) {
     return ChatListState(
       messages: messages ?? this.messages,
       roomId: roomId ?? this.roomId,
+      isBusy: isBusy ?? this.isBusy,
     );
   }
 }

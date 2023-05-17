@@ -37,6 +37,10 @@ class ChatListView extends HookConsumerWidget {
     bool isEngaged = ref.watch(chatRoomProvider) != null &&
         ref.watch(chatRoomProvider)!.isEngaged;
 
+    if (chatListState.isBusy) {
+      return Center(child: kDefaultCircularProgressIndicator);
+    }
+
     if (chatListState.messages.isEmpty) {
       if (isEngaged) {
         return Center(

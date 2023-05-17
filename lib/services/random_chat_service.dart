@@ -21,8 +21,10 @@ class RandomChatService {
     }
   }
 
-  Future<void> search(
-      {required String uid, required String engagementType,}) async {
+  Future<void> search({
+    required String uid,
+    required String engagementType,
+  }) async {
     try {
       // let the users mark themselves free
       await _engagementService.markUserFree(uid: uid);
@@ -120,108 +122,6 @@ class RandomChatService {
     }
   }
 
-  // Future<void> searchUserToVideoCall({required String uid}) async {
-  //   try {
-  //     const _engagementType = EngagementType.video;
-
-  //     // let the users mark themselves free
-  //     await _engagementService.markUserFree(uid: uid);
-
-  //     int _searchStartTs =
-  //         await _engagementService.setEngagementStatusToSearching(
-  //       uid,
-  //       engagementType: _engagementType,
-  //     );
-
-  //     _checkIfShouldKeepGoing();
-
-  //     // query all the free users
-  //     List<String> _listOfPotentialUsers = [];
-
-  //     // Check for potential users every 3 seconds for 3 times. Keeping the users in searching state for 9 seconds
-  //     // in worst case scenario
-  //     for (int i = 0; i < 3; i++) {
-  //       _checkIfShouldKeepGoing();
-
-  //       await Future.delayed(Duration(seconds: 3));
-
-  //       _listOfPotentialUsers = await _engagementService.queryPotentialUsers(
-  //         idToExclude: uid,
-  //         engagementType: _engagementType,
-  //       );
-  //       if (_listOfPotentialUsers.isNotEmpty) {
-  //         break;
-  //       }
-  //     }
-
-  //     _checkIfShouldKeepGoing();
-
-  //     if (_listOfPotentialUsers.isEmpty) {
-  //       await _engagementService.markUserFree(uid: uid);
-  //       throw CustomException("No active users found", code: 'no_user_found');
-  //     }
-
-  //     // pick a user at random
-  //     String _pickedUserId =
-  //         Utils.pickRandomValueFromList(_listOfPotentialUsers);
-
-  //     // Race Conditions: having same pickedUserId
-  //     FirebaseFirestore.instance.runTransaction(
-  //       (transaction) async {
-  //         // Check if the pickedUser has been marked busy
-  //         // If they are marked busy, then query their room id, and store it in a data set
-  //         Engagement _pickedUserEngagement =
-  //             await _engagementService.queryEngagementRecord(
-  //           uid: _pickedUserId,
-  //           transaction: transaction,
-  //         );
-
-  //         if (_pickedUserEngagement.isBusy) {
-  //           await _engagementService.markUserFree(uid: uid);
-  //           throw CustomException("No active users found");
-  //         }
-
-  //         if (_searchStartTs < _pickedUserEngagement.searchStartedOn!) {
-  //           // Generate a room id
-  //           String _roomId = Utils.generateRandomId();
-
-  //           ChatRoom _chatRoom = ChatRoom(
-  //             creatorId: uid,
-  //             joineeId: _pickedUserId,
-  //             roomId: _roomId,
-  //             isEngaged: true,
-  //             type: ChatRoomType.video,
-  //           );
-
-  //           // if user is un-authenticated
-  //           // create chat room
-  //           await createChatRoom(
-  //             chatRoom: _chatRoom,
-  //             transaction: transaction,
-  //           );
-
-  //           // If they are not marked busy, then mark them busy, with chat room
-  //           // mark both the users busy
-  //           _engagementService.connectUsersViaTransaction(
-  //             uid: uid,
-  //             roomId: _roomId,
-  //             connectedWith: _pickedUserId,
-  //             transaction: transaction,
-  //           );
-  //           return;
-  //         }
-  //       },
-  //       maxAttempts: 2,
-  //     );
-  //     // if user is authenticated
-  //     // check if the picked user is a friend
-  //     // if they are, make them join the same room
-  //     // else create chat room
-  //   } on CustomException {
-  //     rethrow;
-  //   }
-  // }
-
   createChatRoom({
     required ChatRoom chatRoom,
     required Transaction transaction,
@@ -234,6 +134,41 @@ class RandomChatService {
           chatRoom);
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
+    }
+  }
+
+  reassignChatRoom({
+    required ChatRoom chatRoom,
+    required String previousUserId,
+    required String currentUserId,
+  }) async {
+    try {
+      Map<String, dynamic> data = {};
+
+      // if the chat room was created by me
+      if (chatRoom.isCreatedByMe(previousUserId)) {
+        data['creator_id'] = currentUserId;
+      } else {
+        data['joinee_id'] = currentUserId;
+      }
+
+      await FirestoreRefs.getChatRoomCollection(
+              isVideoRoom: chatRoom.isVideoRoom)
+          .doc(chatRoom.roomId)
+          .update(data);
+    } on FirebaseException catch (e) {
+      throw CustomException(e.message!);
+    }
+  }
+
+  transferMessageOwnership({
+    required String roomId,
+    required List<Message> messageList,
+  }){
+    for(var m in messageList){
+      FirestoreRefs.getRoomMessageCollection(roomId: roomId).doc(m.id).update({
+        'sent_by': m.sentBy,
+      });
     }
   }
 
@@ -278,7 +213,8 @@ class RandomChatService {
       log("sendMessage: Sending message to room: ${message.roomId}",
           name: "RandomChatService");
       await FirestoreRefs.getRoomMessageCollection(roomId: message.roomId)
-          .add(message);
+          .doc(message.id)
+          .set(message);
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
     }

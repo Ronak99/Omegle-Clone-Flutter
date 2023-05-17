@@ -64,27 +64,6 @@ class EngagementService {
     }
   }
 
-  // connectChatUsers({
-  //   required String uid,
-  //   required String roomId,
-  //   required String connectedWith,
-  // }) async {
-  //   try {
-  //     await FirestoreRefs.engagementCollection.doc(uid).update({
-  //       'status': EngagementStatus.engaged,
-  //       'room_id': roomId,
-  //       'connected_with': connectedWith,
-  //     });
-  //     await FirestoreRefs.engagementCollection.doc(connectedWith).update({
-  //       'status': EngagementStatus.engaged,
-  //       'room_id': roomId,
-  //       'connected_with': uid,
-  //     });
-  //   } on FirebaseException catch (e) {
-  //     throw CustomException(e.message!);
-  //   }
-  // }
-
   connectUsersViaTransaction({
     required String uid,
     required String roomId,
@@ -108,46 +87,28 @@ class EngagementService {
     }
   }
 
-  // connectVideoChatUsers({
-  //   required String uid,
-  //   required String roomId,
-  //   required String connectedWith,
-  // }) async {
-  //   try {
-  //     await FirestoreRefs.engagementCollection.doc(uid).update({
-  //       'status': EngagementStatus.engaged,
-  //       'room_id': roomId,
-  //       'connected_with': connectedWith,
-  //     });
-  //     await FirestoreRefs.engagementCollection.doc(connectedWith).update({
-  //       'status': EngagementStatus.engaged,
-  //       'room_id': roomId,
-  //       'connected_with': uid,
-  //     });
-  //   } on FirebaseException catch (e) {
-  //     throw CustomException(e.message!);
-  //   } on CustomException {
-  //     rethrow;
-  //   }
-  // }
-
-  Future<Engagement> queryEngagementRecord({required String uid, required Transaction transaction}) async {
+  transferEngagement({
+    required Engagement engagement,
+    required String uid,
+  }) async {
     try {
-      DocumentSnapshot<Engagement> _engagementDoc = await transaction.get<Engagement>(FirestoreRefs.engagementCollection.doc(uid));
+      engagement.uid = uid;
+      await FirestoreRefs.engagementCollection.doc(uid).set(engagement);
+    } on FirebaseException catch (e) {
+      throw CustomException(e.message!);
+    }
+  }
+
+  Future<Engagement> queryEngagementRecord(
+      {required String uid, required Transaction transaction}) async {
+    try {
+      DocumentSnapshot<Engagement> _engagementDoc = await transaction
+          .get<Engagement>(FirestoreRefs.engagementCollection.doc(uid));
       return _engagementDoc.data()!;
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
     }
   }
-  // Future<Engagement> queryEngagementRecord({required String uid}) async {
-  //   try {
-  //     DocumentSnapshot<Engagement> _engagementDoc =
-  //         await FirestoreRefs.engagementCollection.doc(uid).get();
-  //     return _engagementDoc.data()!;
-  //   } on FirebaseException catch (e) {
-  //     throw CustomException(e.message!);
-  //   }
-  // }
 
   Stream<DocumentSnapshot<Engagement>> userEngagementStream(
       {required String uid}) {

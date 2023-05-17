@@ -12,6 +12,7 @@ import 'package:omegle_clone/provider/engagement_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/services/engagement_service.dart';
 import 'package:omegle_clone/services/random_chat_service.dart';
+import 'package:omegle_clone/ui/screens/chat/components/chat_list/chat_list_viewmodel.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
@@ -72,7 +73,7 @@ class ChatRoomNotifier extends StateNotifier<ChatRoom?> {
   Future<void> searchUserToChat({required bool forVideoCall}) async {
     try {
       // search user
-      String uid = ref.read(userProvider).uid;
+      String uid = ref.read(userProvider).currentUser.uid;
 
       if (forVideoCall) {
         await _randomChatService.search(
@@ -89,6 +90,20 @@ class ChatRoomNotifier extends StateNotifier<ChatRoom?> {
       print(e);
       // catch error and display it
       Utils.errorSnackbar(e.message);
+    }
+  }
+
+  reassignChatRoom() async {
+    try {
+      await _randomChatService.reassignChatRoom(
+        chatRoom: state!,
+        previousUserId: ref.read(userProvider).previousUser!.uid,
+        currentUserId: ref.read(userProvider).currentUser.uid,
+      );
+
+      ref.read(chatListViewModel.notifier).transferMessageOwnership();
+    } on CustomException {
+      rethrow;
     }
   }
 
