@@ -29,6 +29,15 @@ class ChatScreen extends ConsumerWidget {
                   Tooltip(
                     message: 'Leave Room',
                     child: IconButton(
+                      onPressed: chatScreenViewModelRef.authenticate,
+                      icon: Icon(
+                        Icons.add,
+                      ),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Leave Room',
+                    child: IconButton(
                       onPressed: chatScreenViewModelRef.leaveRoom,
                       icon: Icon(
                         Icons.logout,

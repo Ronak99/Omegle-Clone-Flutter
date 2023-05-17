@@ -7,6 +7,7 @@ import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/states/back_button_data.dart';
+import 'package:omegle_clone/ui/screens/auth/dialogs/authentication_dialog.dart';
 import 'package:omegle_clone/ui/screens/home/viewmodel/home_screen_viewmodel.dart';
 import 'package:omegle_clone/utils/utils.dart';
 
@@ -51,6 +52,10 @@ class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
   leaveRoom() {
     ref.read(chatRoomProvider.notifier).leaveRoom();
     Utils.pop();
+  }
+
+  authenticate() {
+    AuthenticationDialog.show();
   }
 
   onSearchAnotherChatButtonTap() {
