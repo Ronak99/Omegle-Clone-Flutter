@@ -8,6 +8,8 @@ abstract class BaseUser {
   BaseUser({required this.uid, required this.userType});
 
   bool get isAuthenticated => userType == UserType.authenticated;
+
+  Map<String, dynamic> toMap();
 }
 
 class AuthenticatedUser extends BaseUser {
@@ -17,6 +19,14 @@ class AuthenticatedUser extends BaseUser {
     required String uid,
     required this.phoneNumber,
   }) : super(uid: uid, userType: UserType.authenticated);
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'uid': uid,
+      'phone_number': phoneNumber,
+    };
+  }
 }
 
 class UnAuthenticatedUser extends BaseUser {
@@ -25,4 +35,9 @@ class UnAuthenticatedUser extends BaseUser {
           uid: Utils.generateRandomId(),
           userType: UserType.unauthenticated,
         );
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {};
+  }
 }
