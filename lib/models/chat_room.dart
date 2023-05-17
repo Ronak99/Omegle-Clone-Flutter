@@ -50,6 +50,8 @@ class ChatRoom {
   }
 
   bool get isVideoRoom => type == ChatRoomType.video;
+  
+  bool isCreatedByMe(String uid) => creatorId == uid;
 
   // Gives the uid of the other user that has joined in the room
   String getRemoteUid(String uid) => creatorId == uid ? joineeId : creatorId;
