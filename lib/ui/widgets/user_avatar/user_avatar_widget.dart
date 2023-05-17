@@ -17,7 +17,7 @@ class UserAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    BaseUser _baseUser = ref.watch(userProvider);
+    BaseUser _baseUser = ref.watch(userProvider).currentUser;
 
     if (!_baseUser.isAuthenticated) return SizedBox();
 

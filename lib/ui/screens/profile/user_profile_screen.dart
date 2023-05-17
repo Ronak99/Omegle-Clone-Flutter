@@ -15,7 +15,8 @@ class UserProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    AuthenticatedUser _user = ref.read(userProvider) as AuthenticatedUser;
+    AuthenticatedUser _user =
+        ref.read(userProvider).currentUser as AuthenticatedUser;
 
     return Scaffold(
       body: Container(
