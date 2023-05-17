@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/theme/app_theme.dart';
+import 'package:omegle_clone/ui/screens/chat/chat_screen.dart';
 import 'package:omegle_clone/ui/screens/landing/user_landing_screen.dart';
 import 'package:omegle_clone/utils/utils.dart';
 import 'package:one_context/one_context.dart';
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
       builder: OneContext().builder,
       navigatorKey: OneContext().key,
       theme: AppTheme().darkTheme,
-      home: Scaffold(
+      routes: {
+        '/': (context) => Scaffold(
         body: Center(
           child: TextButton(
             child: Text('Go'),
@@ -31,6 +33,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
+        '/landing_screen': (context) => UserLandingScreen(),
+        '/chat_screen': (context) => ChatScreen(),
+      },
+      initialRoute: '/',
     );
   }
 }
