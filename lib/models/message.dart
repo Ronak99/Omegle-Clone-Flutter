@@ -35,4 +35,6 @@ class Message {
       roomId: map['room_id'],
     );
   }
+
+  bool isSentBy(String uid) => sentBy == uid;
 }
