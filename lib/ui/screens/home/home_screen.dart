@@ -13,8 +13,6 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // read this to initialize everything for the first time
-    ref.read(authProvider);
     var homeScreenViewModelRef = ref.read(homeScreenViewModel.notifier);
     var homeScreenState = ref.watch(homeScreenViewModel);
 
