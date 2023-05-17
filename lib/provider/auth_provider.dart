@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:omegle_clone/provider/engagement_provider.dart';
+import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
 import 'package:riverpod/riverpod.dart';
@@ -28,9 +29,17 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   _init() {
-    _subscription = _authService.authChanges().listen((user) {
+    _subscription = _authService.authChanges().listen((user) async {
       state = state.copyWith(isLoggedIn: user != null, user: user);
 
+      ref.read(userProvider.notifier).initialize(isLoggedIn: user != null);
+
+      await ref.read(engagementProvider.notifier).checkForEngagementTransfer();
+
+      // if state is not busy
+      // then invalidate the current provider
+      ref.invalidate(engagementProvider);
+      // and read it again
       ref.read(engagementProvider);
     });
   }
