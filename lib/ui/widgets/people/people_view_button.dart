@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omegle_clone/constants/colors.dart';
+import 'package:omegle_clone/models/app_user.dart';
+import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/ui/screens/landing/user_landing_view_model.dart';
 
 class PeopleViewButton extends ConsumerWidget {
@@ -9,6 +11,10 @@ class PeopleViewButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    BaseUser _baseUser = ref.watch(userProvider);
+
+    if (!_baseUser.isAuthenticated) return SizedBox();
+
     UserLandingViewModel userLandingViewModelRef =
         ref.read(userLandingViewModel.notifier);
 
