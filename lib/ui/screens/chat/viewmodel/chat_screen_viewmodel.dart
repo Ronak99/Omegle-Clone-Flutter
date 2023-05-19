@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/models/app_user.dart';
 import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
@@ -37,7 +38,7 @@ class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
       return;
     }
 
-    Message _message = Message(
+    Message _message = TextMessage(
       id: Utils.generateRandomId(),
       content: textEditingController.text,
       sentBy: ref.read(userProvider).uid,
@@ -49,13 +50,28 @@ class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
     ref.read(chatRoomProvider.notifier).sendMessage(_message);
   }
 
+  sendFriendRequest() {
+    BaseUser _currentUser = ref.read(userProvider).currentUser;
+
+    if (!_currentUser.isAuthenticated) {
+      AuthenticationDialog.show();
+      return;
+    }
+
+    Message _message = FriendRequestMessage(
+      id: Utils.generateRandomId(),
+      sentTo: ref.read(chatRoomProvider)!.getRemoteUid(_currentUser.uid),
+      sentBy: _currentUser.uid,
+      sentTs: Timestamp.now(),
+      roomId: ref.read(chatRoomProvider)!.roomId,
+    );
+
+    ref.read(chatRoomProvider.notifier).sendMessage(_message);
+  }
+
   leaveRoom() {
     ref.read(chatRoomProvider.notifier).leaveRoom();
     Utils.pop();
-  }
-
-  authenticate() {
-    AuthenticationDialog.show();
   }
 
   onSearchAnotherChatButtonTap() {

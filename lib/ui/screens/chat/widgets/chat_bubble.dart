@@ -12,8 +12,7 @@ class ChatBubble extends StatelessWidget {
     required this.currentUserId,
   }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
+  _chatBubbleUI(TextMessage message) {
     bool _isSentByMe = message.sentBy == currentUserId;
 
     double _radius = 15;
@@ -41,5 +40,37 @@ class ChatBubble extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  _friendRequestBubbleUI(FriendRequestMessage message) {
+    bool _isSentByMe = message.sentBy == currentUserId;
+
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: _isSentByMe ? brightActionColor : subtleSurfaceColor,
+        ),
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        margin: EdgeInsets.only(bottom: 12),
+        child: Text(
+          "New Friend Request!",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (message is TextMessage) {
+      return _chatBubbleUI(message as TextMessage);
+    } else {
+      return _friendRequestBubbleUI(message as FriendRequestMessage);
+    }
   }
 }

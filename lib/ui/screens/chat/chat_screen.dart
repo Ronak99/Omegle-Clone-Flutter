@@ -27,9 +27,9 @@ class ChatScreen extends ConsumerWidget {
                 leadingWidth: 30,
                 actions: [
                   Tooltip(
-                    message: 'Leave Room',
+                    message: 'Send Friend Request',
                     child: IconButton(
-                      onPressed: chatScreenViewModelRef.authenticate,
+                      onPressed: chatScreenViewModelRef.sendFriendRequest,
                       icon: Icon(
                         Icons.add,
                       ),

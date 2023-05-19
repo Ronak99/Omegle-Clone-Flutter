@@ -4,4 +4,5 @@ class FirestoreCollection {
   static String engagement = 'engagement';
   static String users = 'users';
   static String messages = 'messages';
+  static String friends = 'friends';
 }

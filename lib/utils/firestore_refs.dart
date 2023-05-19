@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/engagement.dart';
+import 'package:omegle_clone/models/friend.dart';
 import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/utils/firestore_collection.dart';
 
@@ -32,7 +33,14 @@ class FirestoreRefs {
           .collection(FirestoreCollection.messages)
           .withConverter(
             fromFirestore: (snapshot, options) =>
-                Message.fromMap(snapshot.data()!),
+                snapshot.data()!['type'] == 'text'
+                    ? TextMessage.fromMap(snapshot.data()!)
+                    : FriendRequestMessage.fromMap(snapshot.data()!),
             toFirestore: (data, options) => data.toMap(),
           );
+
+  static DocumentReference<Map<String, dynamic>> getFriendsDoc(
+          {required String uid}) =>
+      _firestore
+          .doc('users/$uid/${FirestoreCollection.friends}/${FirestoreCollection.friends}');
 }

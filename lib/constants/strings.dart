@@ -1,0 +1,1 @@
+const String kFriendListKey = 'friend_list';

@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:omegle_clone/provider/engagement_provider.dart';
+import 'package:omegle_clone/provider/friends_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
@@ -33,6 +34,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(isLoggedIn: user != null, user: user);
 
       ref.read(userProvider.notifier).initialize(isLoggedIn: user != null);
+
+      // initialize friends provider
+      ref.read(friendsProvider);
 
       await ref.read(engagementProvider.notifier).checkForEngagementTransfer();
 
