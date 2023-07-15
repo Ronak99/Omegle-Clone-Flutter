@@ -80,7 +80,7 @@ class CallControlStateProvider extends StateNotifier<CallControlState> {
     ref.read(callScreenViewModel.notifier).onSearchAgain();
   }
 
-  onLeaveRoomButtonTap(){
+  onLeaveRoomButtonTap() {
     ref.read(callScreenViewModel.notifier).onBackButtonTap();
   }
 

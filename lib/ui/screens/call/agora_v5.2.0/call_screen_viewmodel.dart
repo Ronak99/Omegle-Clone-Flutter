@@ -108,7 +108,7 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
           ref.read(callControlStateProvider.notifier).unmuteSelf();
         },
         leaveChannel: (stats) {
-          if(mounted){
+          if (mounted) {
             state = state.clearLocalUidAndChannelId();
           }
         },
@@ -147,19 +147,19 @@ class CallScreenViewModel extends StateNotifier<CallScreenState> {
   }
 
   Future<bool> onBackButtonTap() async {
-    ChatRoom? _room = ref.read(videoRoomProvider);
-    if (_room == null) {
-      return true;
-    } else if (!_room.isEngaged) {
-      return true;
-    }
     return await _backButtonData.showGoBack(leaveRoom);
   }
 
   leaveRoom() async {
-    ref.read(videoRoomProvider.notifier).leaveRoom();
-    // reset();
-    Utils.pop();
+    ChatRoom? _room = ref.read(videoRoomProvider);
+
+    if (_room == null) {
+      Utils.pop();
+    } else if (!_room.isEngaged) {
+      Utils.pop();
+    } else {
+      ref.read(videoRoomProvider.notifier).leaveRoom();
+    }
   }
 
   disposeProvider() async {
