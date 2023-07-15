@@ -18,15 +18,12 @@ class HomeScreen extends HookConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          PageStorage(
-            bucket: homeScreenViewModelRef.pageStorageBucket,
-            child: PageView(
-              controller: homeScreenViewModelRef.pageController,
-              children: const [
-                CallViewPage(),
-                ChatViewPage(),
-              ],
-            ),
+          PageView(
+            controller: homeScreenViewModelRef.pageController,
+            children: const [
+              CallViewPage(),
+              ChatViewPage(),
+            ],
           ),
           Container(
             margin: EdgeInsets.only(top: getHomePageBannerHeight(context)),

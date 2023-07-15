@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/ui/screens/home/viewmodel/home_screen_viewmodel.dart';
 
 var userLandingViewModel =
     StateNotifierProvider<UserLandingViewModel, UserLandingScreenState>(
@@ -19,6 +20,17 @@ class UserLandingViewModel extends StateNotifier<UserLandingScreenState> {
   _pageControllerListener() {
     if (!pageController.hasClients) return;
     state = state.copyWith(viewPage: pageController.page);
+
+    if (pageController.page! < 1) {
+      // When navigating back to home screen
+      // Ensure that the correct page is restored onto the home screen pageview
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        ref
+            .read(homeScreenViewModel.notifier)
+            .pageController
+            .jumpToPage(ref.read(homeScreenViewModel).viewPage.toInt());
+      });
+    }
   }
 
   onHandleTap() {
