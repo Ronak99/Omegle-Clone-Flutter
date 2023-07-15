@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:omegle_clone/provider/chat_room_provider.dart';
 import 'package:omegle_clone/services/user_service.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -36,6 +37,17 @@ class FriendsStateProvider extends StateNotifier<FriendListState> {
             .toList(),
       );
     });
+  }
+
+  Future<void> addFriend({required String friendId}) async {
+    String uid = ref.read(userProvider).currentUser.uid;
+    String roomId = ref.read(chatRoomProvider)!.roomId;
+
+    await _friendService.addFriend(
+      uid: uid,
+      friendId: friendId,
+      roomId: roomId,
+    );
   }
 
   @override

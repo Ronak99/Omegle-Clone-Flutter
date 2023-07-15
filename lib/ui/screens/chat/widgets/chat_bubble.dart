@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:omegle_clone/constants/colors.dart';
 import 'package:omegle_clone/models/message.dart';
+import 'package:omegle_clone/provider/friends_provider.dart';
 
 class ChatBubble extends StatelessWidget {
   final Message message;
@@ -42,8 +45,40 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
-  _friendRequestBubbleUI(FriendRequestMessage message,
-      {required double width}) {
+  @override
+  Widget build(BuildContext context) {
+    if (message is TextMessage) {
+      return _chatBubbleUI(message as TextMessage);
+    } else {
+      return FriendRequestBubbleUI(message: message as FriendRequestMessage);
+    }
+  }
+}
+
+class FriendRequestBubbleUI extends ConsumerStatefulWidget {
+  final FriendRequestMessage message;
+
+  const FriendRequestBubbleUI({
+    super.key,
+    required this.message,
+  });
+
+  @override
+  ConsumerState<FriendRequestBubbleUI> createState() =>
+      _FriendRequestBubbleUIState();
+}
+
+class _FriendRequestBubbleUIState extends ConsumerState<FriendRequestBubbleUI> {
+  _onAcceptButtonTap() async {
+    ref
+        .read(friendsProvider.notifier)
+        .addFriend(friendId: widget.message.sentBy);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double _width = MediaQuery.of(context).size.width;
+
     return Align(
       alignment: Alignment.center,
       child: Container(
@@ -57,7 +92,7 @@ class ChatBubble extends StatelessWidget {
           ),
         ),
         height: 115,
-        width: width * .6,
+        width: _width * .6,
         margin: EdgeInsets.only(bottom: 12),
         child: Column(
           children: [
@@ -77,13 +112,18 @@ class ChatBubble extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
+                    child: GestureDetector(
+                      onTap: _onAcceptButtonTap,
+                      child: Container(
+                        decoration: BoxDecoration(
                           color: Colors.black26,
                           borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(25))),
-                      alignment: Alignment.center,
-                      child: Text("Accept"),
+                            bottomLeft: Radius.circular(25),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text("Accept"),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -103,19 +143,5 @@ class ChatBubble extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double _width = MediaQuery.of(context).size.width;
-
-    if (message is TextMessage) {
-      return _chatBubbleUI(message as TextMessage);
-    } else {
-      return _friendRequestBubbleUI(
-        message as FriendRequestMessage,
-        width: _width,
-      );
-    }
   }
 }

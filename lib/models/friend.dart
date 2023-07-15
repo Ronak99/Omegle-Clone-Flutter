@@ -6,7 +6,7 @@ import 'package:omegle_clone/utils/custom_exception.dart';
 
 class Friend extends BaseUser {
   final String roomId;
-  final int addedOn;
+  final String addedOn;
   AuthenticatedUser? authenticatedUser;
 
   Friend({
@@ -37,7 +37,7 @@ class Friend extends BaseUser {
   factory Friend.fromMap(Map<String, dynamic> map) {
     return Friend(
       uid: map['uid'],
-      roomId: map['roomId'],
+      roomId: map['room_id'],
       addedOn: map['added_on'],
     );
   }

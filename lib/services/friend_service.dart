@@ -4,19 +4,42 @@ import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/firestore_refs.dart';
 
 abstract class FriendServiceImpl {
-  void addFriend({required String uid, required Friend friend});
+  void addFriend({required String uid, required String friendId, required String roomId,});
 
-  void removeFriend({required String uid, required Friend friend});
+  void removeFriend({required String uid, required String friendId});
 }
 
 class FriendService implements FriendServiceImpl {
   @override
-  addFriend({required String uid, required Friend friend}) async {
+  Future<void> addFriend({
+    required String uid,
+    required String friendId,
+    required String roomId,
+  }) async {
     try {
-      await FirestoreRefs.getFriendsDoc(uid: uid, friendUid: friend.uid)
-          .set(friend);
+      await connectUsers(connectWith: uid, connectTo: friendId, roomId: roomId);
+      await connectUsers(connectWith: friendId, connectTo: uid, roomId: roomId);
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
+    }
+  }
+
+  connectUsers({
+    required String connectWith,
+    required String connectTo,
+    required String roomId,
+  }) async {
+    try {
+      Friend _friend = Friend(
+          uid: connectTo,
+          roomId: roomId,
+          addedOn: DateTime.now().toIso8601String());
+
+      await FirestoreRefs.getFriendsDoc(
+              uid: connectWith, friendUid: _friend.uid)
+          .set(_friend);
+    } on FirebaseException {
+      rethrow;
     }
   }
 
@@ -24,10 +47,9 @@ class FriendService implements FriendServiceImpl {
       FirestoreRefs.getFriendsCollection(uid: uid).snapshots();
 
   @override
-  removeFriend({required String uid, required Friend friend}) async {
+  removeFriend({required String uid, required String friendId}) async {
     try {
-      await FirestoreRefs.getFriendsDoc(uid: uid, friendUid: friend.uid)
-          .delete();
+      await FirestoreRefs.getFriendsDoc(uid: uid, friendUid: friendId).delete();
     } on FirebaseException catch (e) {
       throw CustomException(e.message!);
     }
