@@ -27,6 +27,13 @@ class AuthenticatedUser extends BaseUser {
       'phone_number': phoneNumber,
     };
   }
+
+  factory AuthenticatedUser.fromMap(Map<String, dynamic> map) {
+    return AuthenticatedUser(
+      uid: map['uid'],
+      phoneNumber: map['phone_number'],
+    );
+  }
 }
 
 class UnAuthenticatedUser extends BaseUser {

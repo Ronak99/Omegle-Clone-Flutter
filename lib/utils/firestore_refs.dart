@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:omegle_clone/models/app_user.dart';
 import 'package:omegle_clone/models/chat_room.dart';
 import 'package:omegle_clone/models/engagement.dart';
 import 'package:omegle_clone/models/friend.dart';
@@ -12,6 +13,13 @@ class FirestoreRefs {
       _firestore.collection(FirestoreCollection.engagement).withConverter(
             fromFirestore: (snapshot, options) =>
                 Engagement.fromMap(snapshot.data()!),
+            toFirestore: (data, options) => data.toMap(),
+          );
+
+  static CollectionReference<AuthenticatedUser> get userCollection =>
+      _firestore.collection(FirestoreCollection.engagement).withConverter(
+            fromFirestore: (snapshot, options) =>
+                AuthenticatedUser.fromMap(snapshot.data()!),
             toFirestore: (data, options) => data.toMap(),
           );
   static CollectionReference<ChatRoom> getChatRoomCollection(
@@ -39,8 +47,17 @@ class FirestoreRefs {
             toFirestore: (data, options) => data.toMap(),
           );
 
-  static DocumentReference<Map<String, dynamic>> getFriendsDoc(
+  static CollectionReference<Friend> getFriendsCollection(
           {required String uid}) =>
       _firestore
-          .doc('users/$uid/${FirestoreCollection.friends}/${FirestoreCollection.friends}');
+          .collection('users/$uid/${FirestoreCollection.friends}')
+          .withConverter(
+            fromFirestore: (snapshot, options) =>
+                Friend.fromMap(snapshot.data()!),
+            toFirestore: (data, options) => data.toMap(),
+          );
+
+  static DocumentReference<Friend> getFriendsDoc(
+          {required String uid, required String friendUid}) =>
+      getFriendsCollection(uid: uid).doc(friendUid);
 }
