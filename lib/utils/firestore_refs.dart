@@ -17,7 +17,7 @@ class FirestoreRefs {
           );
 
   static CollectionReference<AuthenticatedUser> get userCollection =>
-      _firestore.collection(FirestoreCollection.engagement).withConverter(
+      _firestore.collection(FirestoreCollection.users).withConverter(
             fromFirestore: (snapshot, options) =>
                 AuthenticatedUser.fromMap(snapshot.data()!),
             toFirestore: (data, options) => data.toMap(),

@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/models/app_user.dart';
 
 import 'package:omegle_clone/services/auth_service.dart';
+import 'package:omegle_clone/services/user_service.dart';
 import 'package:omegle_clone/ui/screens/auth/dialogs/authentication_dialog.dart';
 import 'package:omegle_clone/utils/custom_exception.dart';
 import 'package:omegle_clone/utils/utils.dart';
@@ -52,6 +54,14 @@ class AuthenticationDialogViewModel
 
       if (_userCredential.additionalUserInfo!.isNewUser) {
         _successMessage = 'Welcome Aboard';
+
+        // register within firestore
+        UserService().registerUserDetails(
+          AuthenticatedUser(
+            uid: _userCredential.user!.uid,
+            phoneNumber: _userCredential.user!.phoneNumber!,
+          ),
+        );
       }
 
       Utils.successSnackbar(_successMessage);

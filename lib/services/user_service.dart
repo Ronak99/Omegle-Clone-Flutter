@@ -13,4 +13,14 @@ class UserService {
       throw CustomException(e.message!);
     }
   }
+
+  Future<void> registerUserDetails(AuthenticatedUser authenticatedUser) async {
+    try {
+      await FirestoreRefs.userCollection
+          .doc(authenticatedUser.uid)
+          .set(authenticatedUser);
+    } on FirebaseException catch (e) {
+      throw CustomException(e.message!);
+    }
+  }
 }
