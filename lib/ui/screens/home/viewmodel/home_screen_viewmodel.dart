@@ -16,6 +16,7 @@ class HomeScreenViewModel extends StateNotifier<HomeScreenState> {
   StateNotifierProviderRef ref;
 
   PageController pageController = PageController();
+  PageStorageBucket pageStorageBucket = PageStorageBucket();
 
   HomeScreenViewModel(this.ref) : super(HomeScreenState()) {
     pageController.addListener(_pageControllerListener);

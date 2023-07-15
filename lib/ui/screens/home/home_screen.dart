@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:omegle_clone/constants/numerics.dart';
-import 'package:omegle_clone/provider/auth_provider.dart';
 import 'package:omegle_clone/ui/screens/home/pages/call_view_page.dart';
 import 'package:omegle_clone/ui/screens/home/pages/chat_view_page.dart';
 import 'package:omegle_clone/ui/screens/home/viewmodel/home_screen_viewmodel.dart';
@@ -19,12 +18,15 @@ class HomeScreen extends HookConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          PageView(
-            controller: homeScreenViewModelRef.pageController,
-            children: const [
-              CallViewPage(),
-              ChatViewPage(),
-            ],
+          PageStorage(
+            bucket: homeScreenViewModelRef.pageStorageBucket,
+            child: PageView(
+              controller: homeScreenViewModelRef.pageController,
+              children: const [
+                CallViewPage(),
+                ChatViewPage(),
+              ],
+            ),
           ),
           Container(
             margin: EdgeInsets.only(top: getHomePageBannerHeight(context)),
