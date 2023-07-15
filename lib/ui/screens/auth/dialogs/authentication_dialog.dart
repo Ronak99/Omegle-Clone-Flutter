@@ -135,33 +135,36 @@ class AuthenticationDialog extends ConsumerWidget {
           body: Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 35),
-                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  border: Border.all(
-                    color: Colors.white24,
+              child: GestureDetector(
+                onTap: () {},
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 35),
+                  padding: EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    border: Border.all(
+                      color: Colors.white24,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Sign In Required!',
-                      style: Theme.of(context).textTheme.headline5,
-                    ),
-                    SizedBox(height: 14),
-                    _userInputView(
-                      context: context,
-                      authenticationDialogViewModel:
-                          authenticationDialogViewModelStateRef,
-                      authenticationDialogState:
-                          authenticationDialogViewModelState,
-                    ),
-                  ],
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Sign In Required!',
+                        style: Theme.of(context).textTheme.headline5,
+                      ),
+                      SizedBox(height: 14),
+                      _userInputView(
+                        context: context,
+                        authenticationDialogViewModel:
+                            authenticationDialogViewModelStateRef,
+                        authenticationDialogState:
+                            authenticationDialogViewModelState,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
