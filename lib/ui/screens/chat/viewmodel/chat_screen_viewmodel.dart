@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omegle_clone/enums/friend_request_status.dart';
 import 'package:omegle_clone/models/app_user.dart';
 import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
@@ -64,6 +65,7 @@ class ChatScreenViewModel extends StateNotifier<ChatScreenState> {
       sentBy: _currentUser.uid,
       sentTs: Timestamp.now(),
       roomId: ref.read(chatRoomProvider)!.roomId,
+      status: FriendRequestStatus.sent,
     );
 
     ref.read(chatRoomProvider.notifier).sendMessage(_message);

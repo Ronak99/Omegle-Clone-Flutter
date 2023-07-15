@@ -4,8 +4,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:omegle_clone/constants/strings.dart';
-import 'package:omegle_clone/models/message.dart';
-import 'package:omegle_clone/services/random_chat_service.dart';
 import 'package:riverpod/riverpod.dart';
 
 import 'package:omegle_clone/models/friend.dart';
@@ -26,14 +24,14 @@ class FriendsStateProvider extends StateNotifier<FriendListState> {
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _subscription;
 
   // Constructor
-  FriendsStateProvider(this.ref) : super(FriendListState()) {
-    _init();
-  }
+  FriendsStateProvider(this.ref) : super(FriendListState());
 
-  _init() {
+  initialize() {
     String uid = ref.read(userProvider).currentUser.uid;
     _subscription =
         _friendService.getFriends(uid).listen((friendListDoc) async {
+      if (friendListDoc.data() == null) return;
+
       List<Map<String, dynamic>> _friendListMap =
           friendListDoc.data()![kFriendListKey] as List<Map<String, dynamic>>;
 

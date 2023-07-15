@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:omegle_clone/models/message.dart';
 import 'package:omegle_clone/provider/chat_room_provider.dart';
 import 'package:omegle_clone/provider/engagement_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
@@ -94,7 +93,7 @@ class ChatListView extends HookConsumerWidget {
                   reverse: true,
                   itemBuilder: (context, i) {
                     return ChatBubble(
-                      message: chatListState.messages[i] as TextMessage,
+                      message: chatListState.messages[i],
                       currentUserId: uid,
                     );
                   },

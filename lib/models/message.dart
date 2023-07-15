@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:omegle_clone/enums/friend_request_status.dart';
 
 abstract class Message {
   String id;
@@ -59,12 +60,14 @@ class TextMessage extends Message {
 
 class FriendRequestMessage extends Message {
   String sentTo;
+  String status;
   FriendRequestMessage({
     required String id,
     required String sentBy,
     required Timestamp sentTs,
     required String roomId,
     required this.sentTo,
+    required this.status,
   }) : super(
             id: id,
             sentBy: sentBy,
@@ -79,6 +82,7 @@ class FriendRequestMessage extends Message {
       sentTs: map['sent_ts'],
       roomId: map['room_id'],
       sentTo: map['sent_to'],
+      status: map['status'],
     );
   }
 
@@ -91,6 +95,12 @@ class FriendRequestMessage extends Message {
       'room_id': roomId,
       'sent_to': sentTo,
       'type': type,
+      'status': status,
     };
   }
+
+  bool isSentByMe(String uid) =>
+      status == FriendRequestStatus.sent && sentBy == uid;
+  bool get isAccepted => status == FriendRequestStatus.accepted;
+  bool get isRejected => status == FriendRequestStatus.rejected;
 }

@@ -6,7 +6,7 @@ import 'package:omegle_clone/provider/auth_provider.dart';
 import 'package:omegle_clone/provider/user_provider.dart';
 import 'package:omegle_clone/ui/screens/home/home_screen.dart';
 import 'package:omegle_clone/ui/screens/landing/user_landing_view_model.dart';
-import 'package:omegle_clone/ui/screens/people/people_screen.dart';
+import 'package:omegle_clone/ui/screens/friends/friends_screen.dart';
 import 'package:omegle_clone/ui/widgets/people/people_view_button.dart';
 import 'package:omegle_clone/ui/widgets/user_avatar/user_avatar_widget.dart';
 

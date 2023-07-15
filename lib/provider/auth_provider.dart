@@ -31,12 +31,16 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   _init() {
     _subscription = _authService.authChanges().listen((user) async {
-      state = state.copyWith(isLoggedIn: user != null, user: user);
+      bool _isLoggedIn = user != null;
 
-      ref.read(userProvider.notifier).initialize(isLoggedIn: user != null);
+      state = state.copyWith(isLoggedIn: _isLoggedIn, user: user);
 
-      // initialize friends provider
-      ref.read(friendsProvider);
+      ref.read(userProvider.notifier).initialize(isLoggedIn: _isLoggedIn);
+
+      if (_isLoggedIn) {
+        // initialize friends provider
+        ref.read(friendsProvider.notifier).initialize();
+      }
 
       await ref.read(engagementProvider.notifier).checkForEngagementTransfer();
 
